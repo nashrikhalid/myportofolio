@@ -19,7 +19,7 @@
 body {
     font-family: -apple-system, "Space Grotesk", "Cantarell", sans-serif;
     color: var(--ink);
-    background-image: linear-gradient(to bottom, var(--paper-1), var(--paper-2), var(--paper-1), var(--paper-2));
+    background-image: linear-gradient(180deg, var(--paper-1) 7.9%, var(--paper-2) 25%, var(--paper-1) 93.77%);
     line-height: 1.6;
 }
 
@@ -28,15 +28,15 @@ h1, h2.brand {
 }
 
 h3, h4 {
-    font-family: "Cantrella", -apple-system;
+    font-family: "Cantarell", -apple-system;
 }
 
-p {font-family: "Cantrella", -apple-system;}
+p {font-family: "Cantarell", -apple-system;}
 
 
 
 .container {
-    max-width: 960px;
+    max-width: 1200px;
     margin: 0 auto;
     padding: 0 1.5rem;
 }
@@ -164,6 +164,7 @@ p {font-family: "Cantrella", -apple-system;}
 .social-link {
     display: inline-block;
     align-items: center;
+    justify-content: center;
     font-size: 1.2rem;
     text-decoration: none;
     color: var(--ink);
@@ -192,7 +193,7 @@ p {font-family: "Cantrella", -apple-system;}
     position:relative;
     z-index: 2;
     display: block;
-    width: 100%;
+    width: 50%;
     aspect-ratio: 1 / 1;
     object-fit: cover;
     border-radius: 16px;
@@ -270,7 +271,7 @@ p {font-family: "Cantrella", -apple-system;}
 
 .project-photo,
 .project-photo-placeholder {
-    width: 100%;
+    width: 50%;
     aspect-ratio: 4 / 3;
     background-color: rgba(255, 255, 255, 0.85);
     border-radius: 8px;
