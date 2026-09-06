@@ -1,13 +1,16 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nashri Khalid - Portfolio</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 <body>
@@ -28,8 +31,10 @@
             <div class="container hero-grid">
                 <div class="hero-identity">
                     <h1>Nashri Khalid</h1>
-                    <p class="hero-education">2nd Year Undergraduate Information Systems Student Universitas Indonesia</p>
-                    <p class="hero-interest">Interest: Product Management, Data Analytics, and Data Engineering</p>
+                    <p class="hero-education">2nd Year Undergraduate Information Systems Student<br>Universitas Indonesia</p>
+                    <div class="interest-block">
+                        <p class="hero-interest">Interest: Product Management, Data Analytics, and Data Engineering</p>
+                    </div>
                 </div>
                 <div class="social-links">
                         <a href="https://github.com/nashrikhalid" class="social-link" aria-label="GitHub">
@@ -42,68 +47,70 @@
                             <i class="fa-solid fa-envelope"></i></a>
                 </div>
                 <div class="hero-photo">
-                    <div class="photo-block">
-                        <img class="avatar" src="/static/img/portophoto.jpeg" alt="Photo of Nashri">
+                    <img class="avatar" src="/static/img/portophoto1.png" alt="Photo of Nashri">
+                    <div class="meta-list glass-card">
+                        <p>NPM 2506657131<br>
+                        PBP-F</p>
                     </div>
-                    <dl class="meta-list">
-                        <div class="meta-row">
-                            <dt>NPM</dt>
-                            <dd>2506657131</dd>
-                        </div>
-                    </dl>
                 </div>
                 <div class="hero-details">
-                    <p class="bio">Second-year IS student at Universitas Indonesia, interested in data and product management, </p>
+                    <h2 class="aboutme-heading">About me</h2>
+                    <p class="bio">Based in Jakarta, Nashri is a curious explorer who enjoys trying new things before settling on one path.
+                                    His interests currently span product management, data analysis, and data engineering, though he stays 
+                                    open to wherever his curiosity leads next. He is currently on progress learning a variety of tools to 
+                                    sharpen his skills in these fields. Organizationally active since high school, he has developed
+                                    cross-functional collaboration and decision-making abilities through various leadership and operational 
+                                    roles. Outside of academics, he loves music, especially singing, as a way to unwind and recharge.</p>
                 </div>
             </div>
         </section>
         <section class="content-section" id="skills">
-            <div class="container hero-grid">
-                <div class="hero-skills">
+            <div class="container">
+                <div class="skills-wrapper">
                     <h2>Skills</h2>
-                    <a class="skill" aria-label="Python">
+                    <a class="skill glass-card" aria-label="Python">
                         <i class="fa-brands fa-python"></i></a>
-                    <a class="skill" aria-label="Java">
+                    <a class="skill glass-card" aria-label="Java">
                         <i class="fa-brands fa-java"></i></a>
-                    <a class="skill" aria-label="Figma">
+                    <a class="skill glass-card" aria-label="Figma">
                         <i class="fa-brands fa-figma"></i></a>
-                    <a class="skill" aria-label="CSS3">
+                    <a class="skill glass-card" aria-label="CSS3">
                         <i class="fa-brands fa-css3"></i></a>
-                    <a class="skill" aria-label="HTML5">
+                    <a class="skill glass-card" aria-label="HTML5">
                         <i class="fa-brands fa-html5"></i></a>
-                    <a class="skill" aria-label="HTML5">
+                    <a class="skill glass-card" aria-label="Git">
                         <i class="fa-brands fa-git"></i></a>
                 </div>
             </div>
         </section>
         <section class="content-section" id="projects">
-            <div class="container hero-grid">
-                <div class="hero-projects">
+            <div class="container">
+                <div class="projects-wrapper">
                     <h2>Projects</h2>
-                    <div class="hero-project">
-                        <div class="project-block">
-                            <img class="project-photo" src="" alt="Photo of Project">
+                    <div class="project-wrapper">
+                        <div class="project-block glass-card">
+                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
                             <h3>Coming Soon</h3>
                             <p>Coming very soon</p>
                         </div>
                     </div>
-                    <div class="hero-project">
-                        <div class="project-block">
-                            <img class="project-photo" src="" alt="Photo of Project">
+                    <div class="project-wrapper">
+                        <div class="project-block glass-card">
+                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
                             <h3>Coming Soon</h3>
                             <p>Coming very soon</p>
                         </div>
                     </div>
-                    <div class="hero-project">
-                        <div class="project-block">
-                            <img class="project-photo" src="" alt="Photo of Project">
+                    <div class="project-wrapper">
+                        <div class="project-block glass-card">
+                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
                             <h3>Coming Soon</h3>
                             <p>Coming very soon</p>
                         </div>
                     </div>
-                    <div class="hero-project">
-                        <div class="project-block">
-                            <img class="project-photo" src="" alt="Photo of Project">
+                    <div class="project-wrapper">
+                        <div class="project-block glass-card">
+                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
                             <h3>Coming Soon</h3>
                             <p>Coming very soon</p>
                         </div>
@@ -112,11 +119,11 @@
             </div>
         </section>
         <section class="content-section" id="experiences">
-            <div class="container hero-grid">
-                <div class="hero-experiences">
+            <div class="container">
+                <div class="experiences-wrapper">
                     <h2>Experiences and Activities</h2>
-                    <div class="hero-experience">
-                        <div class="experience-block">
+                    <div class="experience-wrapper">
+                        <div class="experience-block glass-card">
                             <div class="time-block">
                                 <p class="time">Apr 2026 - Sep 2026</p>
                             </div>
@@ -129,7 +136,7 @@
                                 <li>Serve as on-ground staff throughout the bootcamp, taking on roles such as MC, timekeeper, and operator.</li>
                             </ul>
                         </div>
-                        <div class="experience-block">
+                        <div class="experience-block glass-card">
                             <div class="time-block">
                                 <p class="time">Jan 2026 - May 2026</p>
                             </div>
@@ -138,8 +145,9 @@
                             <ul>
                                 <li>Recruited and selected capable staff for the business development division</li>
                                 <li>Maintained smooth operations and staff motivation within the business development division as needed</li>
+                            </ul>
                         </div>
-                        <div class="experience-block">
+                        <div class="experience-block glass-card">
                             <div class="time-block">
                                 <p class="time">Oct 2025 - Dec 2025</p>
                             </div>
@@ -150,6 +158,8 @@
                                 <li>Collaborated with cross-functional teams on a web development project</li>
                             </ul>
                         </div>
+                        <div class="experience-block glass-card"></div>
+                        <p>More to come...</p>
                     </div>
                 </div>
             </div>
