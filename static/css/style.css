@@ -9,8 +9,6 @@
     --paper-1: #00072d;
     --paper-2: #4f2b85;
     --accent: #94A3B8;
-    --accent-dark: #a8442a;
-    --line: #e3d9c9;
     --text-muted: #ffffff;
     --radius: 4px;
     --radius-1: 999px;
@@ -37,8 +35,8 @@ p {font-family: "Cantarell", -apple-system;}
 
 .container {
     max-width: 1200px;
-    margin: 0 auto;
-    padding: 0 1.5rem;
+    margin-left: 0 auto;
+    padding: 0 3rem;
 }
 
 .site-header {
@@ -81,36 +79,46 @@ p {font-family: "Cantarell", -apple-system;}
 }
 
 .hero {
-    padding: 4.5rem 0 5rem;
+    padding: 1.75rem 0 2rem;
 }
 
 .hero-grid {
     display: grid;
-    grid-template-columns: 1.3fr 1fr;
+    grid-template-columns: 1.5fr 1fr;
     grid-template-areas:
         "identity photo"
-        "details  photo";
+        "details  details";
     gap: 1.5rem 3rem;
 }
 
 .hero-identity {
     grid-area: identity;
+    align-self: center; 
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    justify-content: center;
 }
 
 .hero-details {
     grid-area: details;
+    margin-top: 3rem;
 }
 
 .hero-education {
     font-family: "Space Grotesk";
     color: var(--text-muted);
     margin-bottom: 1rem;
+    margin-left: 0.2rem;
 }
 
 .hero-identity h1 {
     font-size: clamp(3rem, 7vw, 5rem);
     line-height: 0.95;
     margin-bottom: 0.75rem;
+    text-shadow: 0 0 30px rgba(255, 255, 255, 0.5), 
+                 0 0 30px rgba(255, 255, 255, 0.2);
+    animation: text-glow-pulse 3s ease-in-out infinite;
 }
 
 .interest-block {
@@ -121,31 +129,38 @@ p {font-family: "Cantarell", -apple-system;}
     border-radius: var(--radius-1);
     margin-top: 0.5rem;
     margin-bottom: 1.25rem;
-    padding: 0.5rem 1.25rem;
+    padding: 0.35rem 1.25rem;
+    width: fit-content;
 }
 
 .hero-interest {
-    font-size: 0.85rem;
-    white-space: normal;
+    font-size: 0.95rem;
+    white-space: nowrap;
+    font-weight: 1000;
+    margin: 0;
 }
 
 .bio {
     color: var(--text-muted);
-    max-width: 480px;
-    margin-bottom: 1.5rem;
+    text-align: justify;
 }
 
 .aboutme-heading {
     margin-top: 0.5rem;
-    margin-bottom: 1rem;
-    font-size: 1.5rem;
+    margin-bottom: 0.3rem;
+    font-size: 1.75rem;
 }
 
 .meta-list {
-    display: block;
-    padding: 1rem 1.25rem;
-    margin-top: 1rem;
-    text-align: left;
+    position: absolute;
+    left: 50%;
+    bottom: -1rem;
+    transform: translateX(-50%);
+    z-index: 3;
+    width: 300px;
+    max-width: 85%;
+    padding: 0.8rem 1.25rem;
+    text-align: center;
 }
 
 .meta-list p {
@@ -165,10 +180,11 @@ p {font-family: "Cantarell", -apple-system;}
     display: inline-block;
     align-items: center;
     justify-content: center;
+    align-content: center;
+    text-align: center;
     font-size: 1.2rem;
     text-decoration: none;
     color: var(--ink);
-    padding: 0.5rem 1rem; /**/
     width: 2.75rem;
     height: 2.75rem;
     /*Glassmorphism*/
@@ -185,16 +201,33 @@ p {font-family: "Cantarell", -apple-system;}
 
 .hero-photo {
     grid-area: photo;
-    align-self: center;
+    align-self: start;
+    justify-self: end;
     position: relative;
+    width: 70%;
+    max-width: 320px;
+}
+
+.hero-photo::before {
+    content: "";
+    position: absolute;
+    top: 50px;
+    right: 3px;
+    bottom: 40px;
+    left: -1px;
+    background: rgba(255, 255, 255, 0.16);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.22);
+    border-radius: 110px;
+    z-index: 0;
 }
 
 .avatar {
     position:relative;
     z-index: 2;
     display: block;
-    width: 50%;
-    aspect-ratio: 1 / 1;
+    width: 100%;
+    aspect-ratio: 1 / 1.25;
     object-fit: cover;
     border-radius: 16px;
 }
@@ -203,7 +236,7 @@ p {font-family: "Cantarell", -apple-system;}
     padding: 1.5rem;
     color: var(--text-muted);
     font-size: 0.85rem;
-    border-top: 1px solid var(--line);
+    border-top: 1px solid var(--ink);
     text-align: center;
 }
 
@@ -211,18 +244,18 @@ p {font-family: "Cantarell", -apple-system;}
     background: rgba(255, 255, 255, 0.17);
     backdrop-filter: blur(8px);
     border: 1px solid rgba(255, 255, 255, 0.22);
-    border-radius: 16px;
+    border-radius: 22px;
     box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
     
 }
 
 .content-section {
-    padding: 2.5rem 0;
+    padding: 1rem 0;
 }
 
 .content-section h2 {
     font-size: 1.75rem;
-    margin-bottom: 1.5rem;
+    margin-bottom: 0.75rem;
 }
 
 .skills-wrapper {
@@ -249,29 +282,43 @@ p {font-family: "Cantarell", -apple-system;}
     transform: translateY(-3px);
 }
 
-.projects-wrapper{
-    display: flex;             
-    flex-direction: row;       
-    gap: 1rem;                 
-}
-
 .project-wrapper {
     display: flex;
     flex-direction: row;
     gap: 1rem;
     align-items: stretch;
-    justify-content: flex-start;
-    flex-wrap: wrap;
+    overflow-x: auto;
+    scroll-snap-type: x proximity;
+    padding-bottom: 0.75rem;
+    cursor: grab;
+    scrollbar-width: thin;
+    scrollbar-color: rgba(255, 255, 255, 0.35) transparent;
+}
+
+.project-wrapper.dragging {
+    cursor: grabbing;
+    scroll-snap-type: none;
+    user-select: none;
+}
+
+.projects-wrapper::-webkit-scrollbar{
+    height: 6px;               
+}
+
+.project-wrapper::-webkit-scrollbar-thumb {
+    background: rgba(255, 255, 255, 0.35);
+    border-radius: var(--radius-1);
 }
 
 .project-block {
-    flex: 1 1 200px;
+    flex: 0 0 300px;
+    scroll-snap-align: start;
     padding: 1rem;
 }
 
 .project-photo,
 .project-photo-placeholder {
-    width: 50%;
+    width: 100%;
     aspect-ratio: 4 / 3;
     background-color: rgba(255, 255, 255, 0.85);
     border-radius: 8px;
@@ -319,6 +366,8 @@ p {font-family: "Cantarell", -apple-system;}
     height: 11px;
     background: var(--ink);
     border-radius: 50%;
+        box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.85), 0 0 16px 6px rgba(148, 163, 184, 0.55);
+    animation: dot-glow 2.4s ease-in-out infinite;
 }
  
 .time-block .time {
@@ -372,6 +421,29 @@ p {font-family: "Cantarell", -apple-system;}
     height: 11px;
     background: var(--ink);
     border-radius: 50%;
+    box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.85), 0 0 16px 6px rgba(148, 163, 184, 0.55);
+    animation: dot-glow 2.4s ease-in-out infinite;
+}
+
+@keyframes dot-glow {
+    0%, 100% {
+        box-shadow: 0 0 6px 2px rgba(255, 255, 255, 0.85), 0 0 16px 6px rgba(148, 163, 184, 0.55);
+    }
+    50% {
+        box-shadow: 0 0 10px 4px rgba(255, 255, 255, 1), 0 0 24px 10px rgba(148, 163, 184, 0.75);
+    }
+}
+
+@keyframes text-glow-pulse {
+    0%, 100% {
+        text-shadow: 0 0 10px rgba(255, 255, 255, 0.4),
+                     0 0 20px rgba(255, 255, 255, 0.2);
+    }
+    50% {
+        text-shadow: 0 0 15px rgba(255, 255, 255, 0.9),
+                     0 0 35px rgba(255, 255, 255, 0.6),
+                     0 0 50px var(--accent);
+    }
 }
 
 @media (max-width: 600px) {
