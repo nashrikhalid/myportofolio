@@ -35,7 +35,7 @@ p {font-family: "Cantarell", -apple-system;}
 
 .container {
     max-width: 1200px;
-    margin-left: 0 auto;
+    margin: 0 auto;
     padding: 0 3rem;
 }
 
@@ -51,7 +51,7 @@ p {font-family: "Cantarell", -apple-system;}
     justify-content: space-between;
     align-items: center;
     padding: 0.5rem 1.25rem;
-    margin: -0.5rem 0.5rem;
+    margin: 0 auto;
 
     /*Glassmorphism*/
     background: rgba(255, 255, 255, 0.17);
