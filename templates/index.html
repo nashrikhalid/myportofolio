@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Nashri Khalid - Portfolio</title>
+    <title>{{ name }} - Portfolio</title>
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -16,12 +16,12 @@
 <body>
     <header class="site-header">
         <div class="container">
-            <a href="#profile" class="brand">Nashri</a>
+            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
             <nav>
-                <a href="#home">Home</a>
+                <a href="{% url 'main:show_main' %}">Profile</a>
                 <a href="#skills">Skills</a>
                 <a href="#projects">Projects</a>
-                <a href="#experiences">Experiences</a>
+                <a href="{% url 'main:show_experience' %}">Experiences</a>
             </nav>
         </div>
     </header>
@@ -30,7 +30,7 @@
         <section class="hero" id="home">
             <div class="container hero-grid">
                 <div class="hero-identity">
-                    <h1>Nashri Khalid</h1>
+                    <h1>{{fullname}}</h1>
                     <p class="hero-education">2nd Year Undergraduate Information Systems Student<br>Universitas Indonesia</p>
                     <div class="interest-block">
                         <p class="hero-interest">Interest: Product Management, Data Analytics, and Data Engineering</p>
@@ -47,20 +47,15 @@
                     </div>
                 </div>
                 <div class="hero-photo">
-                    <img class="avatar" src="/static/img/portophoto1.png" alt="Photo of Nashri">
+                    <img class="avatar" src="/static/img/portophoto1.png" alt="Photo of {{ name }}">
                     <div class="meta-list glass-card">
-                        <p>NPM 2506657131<br>
+                        <p>{{ npm }}<br>
                         PBP-F</p>
                     </div>
                 </div>
                 <div class="hero-details">
                     <h2 class="aboutme-heading">About me</h2>
-                    <p class="bio">Based in Jakarta, Nashri is a curious explorer who enjoys trying new things before settling on one path.
-                                    His interests currently span product management, data analysis, and data engineering, though he stays 
-                                    open to wherever his curiosity leads next. He is currently on progress learning a variety of tools to 
-                                    sharpen his skills in these fields. Organizationally active since high school, he has developed
-                                    cross-functional collaboration and decision-making abilities through various leadership and operational 
-                                    roles. Outside of academics, he loves music, especially singing, as a way to unwind and recharge.</p>
+                    <p class="bio">{{bio}}</p>
                 </div>
             </div>
         </section>
@@ -88,7 +83,7 @@
                 <h2>Projects</h2>
                     <div class="project-wrapper">
                         <div class="project-block glass-card">
-                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
+                            <img class="project-photo" src="/static/img/example.png" alt="Photo of {{ name }}">
                             <h3>Coming Soon</h3>
                             <p>Coming very soon</p>
                         </div>
@@ -161,7 +156,7 @@
 
     <footer class="site-footer">
         <div class="container">
-            <p>&copy; 2026 Nashri. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
         </div>
     </footer>
 </body>
