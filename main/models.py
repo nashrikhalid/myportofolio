@@ -15,6 +15,7 @@ class Experience(models.Model):
     
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     title = models.CharField(max_length=255)
+    org = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=20, choices=EXPERIENCE_CHOICES, default='full-time')
     thumbnail = models.URLField(blank=True, null=True)
@@ -26,3 +27,18 @@ class Experience(models.Model):
     @property
     def is_ongoing(self):
         return self.ended_at is None
+
+class Project(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    preview = models.ImageField(default='/static/img/example.png')
+    title = models.CharField(max_length=255, default='Coming soon')
+    description = models.TextField(default='Coming very soon')
+    def __str__(self):
+        return self.preview
+
+class Skill(models.Model):
+    id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
+    skill_logo = models.CharField(max_length=100)
+    skill_name = models.CharField(max_length=50)
+    def __str__(self):
+        return self.skill_name
