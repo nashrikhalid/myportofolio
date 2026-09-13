@@ -18,7 +18,6 @@ class Experience(models.Model):
     org = models.CharField(max_length=255)
     description = models.TextField()
     category = models.CharField(max_length=20, choices=EXPERIENCE_CHOICES, default='full-time')
-    thumbnail = models.URLField(blank=True, null=True)
     started_at = models.DateTimeField(auto_now_add=True)
     ended_at = models.DateTimeField(blank=True, null=True)
     def __str__(self):
@@ -30,15 +29,15 @@ class Experience(models.Model):
 
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    preview = models.ImageField(default='/static/img/example.png')
+    preview = models.CharField(default='/static/img/example.png')
     title = models.CharField(max_length=255, default='Coming soon')
     description = models.TextField(default='Coming very soon')
     def __str__(self):
-        return self.preview
+        return self.title
 
 class Skill(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    skill_logo = models.CharField(max_length=100)
-    skill_name = models.CharField(max_length=50)
+    logo = models.CharField(max_length=100)
+    name = models.CharField(max_length=50)
     def __str__(self):
         return self.skill_name

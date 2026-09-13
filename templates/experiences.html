@@ -1,0 +1,79 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Experience - {{ fullname }}</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+<body>
+    <header class="site-header">
+        <div class="container">
+            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
+            <nav>
+                <a href="{% url 'main:show_main' %}">Profile</a>
+
+                <a href="{% url 'main:show_skill' %}">Skills</a>
+                <a href="{% url 'main:show_project' %}">Projects</a>
+                <a href="{% url 'main:show_experience' %}">Experiences</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+    <section class="experiences-section" id="experiences">
+        <div class="container">
+            <div class="experiences-wrapper"></div>
+                <h2>Experiences and Activities</h2>
+
+                <div class="experience-wrapper">
+                    {% for experience in experience_list %}
+                        <div class="experience-block glass-card">
+                            <div class="time-block">
+                                <p class="time">
+                                    {{ experience.started_at|date:"M Y" }} - 
+                                    {% if experience.is_ongoing %}
+                                        Present
+                                    {% else %}
+                                        {{ experience.ended_at|date:"M Y" }}
+                                    {% endif %}
+                                </p>
+                                <span class="experience-category glass-card">
+                                    {{ experience.get_category_display }}
+                                </span>
+                            </div>
+                            <h3>{{ experience.title }}</h3>
+                            <h4>{{ experience.org }}</h4>
+                            <ul>
+                                <li>{{ experience.description }}</li>
+                            </ul>
+                        </div>
+                    {% empty %}
+                        <div class="experience-block glass-card"></div>
+                            <p class="empty-state">
+                                Belum ada pengalaman yang ditambahkan.
+                            </p>
+                    </div>
+                {% endfor %}
+                </div>
+                <div class="experience-block glass-card">
+                    <p class="more-to-come">More to come...</p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <footer class="site-footer">
+        <div class="container">
+            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
+        </div>
+    </footer>
+</body>
+</html>

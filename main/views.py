@@ -1,7 +1,5 @@
 from django.shortcuts import render
 
-from django.shortcuts import render
-
 from main.models import Experience
 
 from main.models import Project
@@ -23,6 +21,7 @@ def show_main(request):
             "cross-functional collaboration and decision-making abilities through various leadership and operational"
             "roles. Outside of academics, he loves music, especially singing, as a way to unwind and recharge."
         ),
+        "skill_list": Skill.objects.all(),
     }
     return render(request, "index.html", context)
 
@@ -32,7 +31,7 @@ def show_experience(request):
         "name": "Nashri",
         "experience_list": Experience.objects.all(),
     }
-    return render(request, "experience.html", context)
+    return render(request, "experiences.html", context)
 
 def show_project(request):
     context = {

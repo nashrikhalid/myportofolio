@@ -19,8 +19,8 @@
             <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
             <nav>
                 <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="#skills">Skills</a>
-                <a href="#projects">Projects</a>
+                <a href="{% url 'main:show_skill' %}">Skills</a>
+                <a href="{% url 'main:show_project' %}">Projects</a>
                 <a href="{% url 'main:show_experience' %}">Experiences</a>
             </nav>
         </div>
@@ -59,6 +59,8 @@
                 </div>
             </div>
         </section>
+
+        {% include 'skills.html' %}
         <section class="content-section" id="skills">
             <div class="container">
                 <h2>Skills</h2>
