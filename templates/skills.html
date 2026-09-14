@@ -1,16 +1,13 @@
-{% extends 'base.html' %}
-{% block content %}
+
     <section class="skills-section" id="skills">
         <div class="container">
             <h2>Skills</h2>
             <div class="skills-wrapper">
                 {% for skill in skill_list %}
-                <div class="project-block glass-card" aria-label="{{skill.name}}">
+                <div class="skill glass-card" aria-label="{{skill.name}}">
                     <span class="{{ skill.logo }}"></span>
                 </div>
                 {% endfor %}
             </div>
         </div>
     </section>
-
-{% endblock %}

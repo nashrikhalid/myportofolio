@@ -29,7 +29,7 @@ class Experience(models.Model):
 
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    preview = models.CharField(default='/static/img/example.png')
+    preview = models.CharField(max_length=255, default='/static/img/example.png')
     title = models.CharField(max_length=255, default='Coming soon')
     description = models.TextField(default='Coming very soon')
     def __str__(self):
