@@ -1,165 +1,37 @@
-{% load static %}
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>{{ name }} - Portfolio</title>
-    <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.0">
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="/static/css/style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Cantarell:wght@400;700&family=Space+Grotesk:wght@500;700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-</head>
-<body>
-    <header class="site-header">
-        <div class="container">
-            <a href="{% url 'main:show_main' %}" class="brand">{{ name }}</a>
-            <nav>
-                <a href="{% url 'main:show_main' %}">Profile</a>
-                <a href="{% url 'main:show_skill' %}">Skills</a>
-                <a href="{% url 'main:show_project' %}">Projects</a>
-                <a href="{% url 'main:show_experience' %}">Experiences</a>
-            </nav>
+{% extends 'base.html' %}
+{% block content %}
+    <section class="hero" id="home">
+        <div class="container hero-grid">
+            <div class="hero-identity">
+                <h1>{{fullname}}</h1>
+                <p class="hero-education">2nd Year Undergraduate Information Systems Student<br>Universitas Indonesia</p>
+                <div class="interest-block">
+                    <p class="hero-interest">Interest: Product Management, Data Analytics, and Data Engineering</p>
+                </div>
+                <div class="social-links">
+                        <a href="https://github.com/nashrikhalid" class="social-link" aria-label="GitHub">
+                            <i class="fa-brands fa-github"></i></a>
+                        <a href="https://www.linkedin.com/in/nashrikhalid" class="social-link" aria-label="LinkedIn">
+                            <i class="fa-brands fa-linkedin"></i></a>
+                        <a href="https://www.instagram.com/nashrikhlid" class="social-link" aria-label="Instagram">
+                            <i class="fa-brands fa-instagram"></i></a>
+                        <a href="mailto:nashrikhalid@gmail.com" class="social-link" aria-label="Mail">
+                            <i class="fa-solid fa-envelope"></i></a>
+                </div>
+            </div>
+            <div class="hero-photo">
+                <img class="avatar" src="/static/img/portophoto1.png" alt="Photo of {{ name }}">
+                <div class="meta-list glass-card">
+                    <p>{{ npm }}<br>
+                    PBP-F</p>
+                </div>
+            </div>
+            <div class="hero-details">
+                <h2 class="aboutme-heading">About me</h2>
+                <p class="bio">{{bio}}</p>
+            </div>
         </div>
-    </header>
+    </section>
 
-    <main>
-        <section class="hero" id="home">
-            <div class="container hero-grid">
-                <div class="hero-identity">
-                    <h1>{{fullname}}</h1>
-                    <p class="hero-education">2nd Year Undergraduate Information Systems Student<br>Universitas Indonesia</p>
-                    <div class="interest-block">
-                        <p class="hero-interest">Interest: Product Management, Data Analytics, and Data Engineering</p>
-                    </div>
-                    <div class="social-links">
-                            <a href="https://github.com/nashrikhalid" class="social-link" aria-label="GitHub">
-                                <i class="fa-brands fa-github"></i></a>
-                            <a href="https://www.linkedin.com/in/nashrikhalid" class="social-link" aria-label="LinkedIn">
-                                <i class="fa-brands fa-linkedin"></i></a>
-                            <a href="https://www.instagram.com/nashrikhlid" class="social-link" aria-label="Instagram">
-                                <i class="fa-brands fa-instagram"></i></a>
-                            <a href="mailto:nashrikhalid@gmail.com" class="social-link" aria-label="Mail">
-                                <i class="fa-solid fa-envelope"></i></a>
-                    </div>
-                </div>
-                <div class="hero-photo">
-                    <img class="avatar" src="/static/img/portophoto1.png" alt="Photo of {{ name }}">
-                    <div class="meta-list glass-card">
-                        <p>{{ npm }}<br>
-                        PBP-F</p>
-                    </div>
-                </div>
-                <div class="hero-details">
-                    <h2 class="aboutme-heading">About me</h2>
-                    <p class="bio">{{bio}}</p>
-                </div>
-            </div>
-        </section>
-
-        {% include 'skills.html' %}
-        <section class="content-section" id="skills">
-            <div class="container">
-                <h2>Skills</h2>
-                <div class="skills-wrapper">
-                    <a class="skill glass-card" aria-label="Python">
-                        <i class="fa-brands fa-python"></i></a>
-                    <a class="skill glass-card" aria-label="Java">
-                        <i class="fa-brands fa-java"></i></a>
-                    <a class="skill glass-card" aria-label="Figma">
-                        <i class="fa-brands fa-figma"></i></a>
-                    <a class="skill glass-card" aria-label="CSS3">
-                        <i class="fa-brands fa-css3"></i></a>
-                    <a class="skill glass-card" aria-label="HTML5">
-                        <i class="fa-brands fa-html5"></i></a>
-                    <a class="skill glass-card" aria-label="Git">
-                        <i class="fa-brands fa-git"></i></a>
-                </div>
-            </div>
-        </section>
-        <section class="content-section" id="projects">
-            <div class="container">
-                <h2>Projects</h2>
-                    <div class="project-wrapper">
-                        <div class="project-block glass-card">
-                            <img class="project-photo" src="/static/img/example.png" alt="Photo of {{ name }}">
-                            <h3>Coming Soon</h3>
-                            <p>Coming very soon</p>
-                        </div>
-                        <div class="project-block glass-card">
-                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
-                            <h3>Coming Soon</h3>
-                            <p>Coming very soon</p>
-                        </div>
-                        <div class="project-block glass-card">
-                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
-                            <h3>Coming Soon</h3>
-                            <p>Coming very soon</p>
-                        </div>
-                        <div class="project-block glass-card">
-                            <img class="project-photo" src="/static/img/example.png" alt="Photo of Project">
-                            <h3>Coming Soon</h3>
-                            <p>Coming very soon</p>
-                        </div>
-                    </div>
-            </div>
-        </section>
-        <section class="content-section" id="experiences">
-            <div class="container">
-                <div class="experiences-wrapper">
-                    <h2>Experiences and Activities</h2>
-                    <div class="experience-wrapper">
-                        <div class="experience-block glass-card">
-                            <div class="time-block">
-                                <p class="time">Apr 2026 - Sep 2026</p>
-                            </div>
-                            <h3>Product Management Academy Staff</h3>
-                            <h4>COMPFEST 18</h4>
-                            <ul>
-                                <li>Evaluated prospective Product Management Academy applicants through a
-                                    multi-stage assessment process</li>
-                                <li>Served as Liaison Officer for guest speakers from leading companies</li>
-                                <li>Serve as on-ground staff throughout the bootcamp, taking on roles such as MC, timekeeper, and operator.</li>
-                            </ul>
-                        </div>
-                        <div class="experience-block glass-card">
-                            <div class="time-block">
-                                <p class="time">Jan 2026 - May 2026</p>
-                            </div>
-                            <h3>Human Resource Staff of Business Development</h3>
-                            <h4>BETIS 2026</h4>
-                            <ul>
-                                <li>Recruited and selected capable staff for the business development division</li>
-                                <li>Maintained smooth operations and staff motivation within the business development division as needed</li>
-                            </ul>
-                        </div>
-                        <div class="experience-block glass-card">
-                            <div class="time-block">
-                                <p class="time">Oct 2025 - Dec 2025</p>
-                            </div>
-                            <h3>UI/UX Intern at Business Partnership Bureau</h3>
-                            <h4>BEM Fasilkom UI</h4>
-                            <ul>
-                                <li>Learned and applied Figma for UI/UX design tasks</li>
-                                <li>Collaborated with cross-functional teams on a web development project</li>
-                            </ul>
-                        </div>
-                        <div class="experience-block glass-card">
-                            <p>More to come...</p>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </section>
-    </main>
-
-    <footer class="site-footer">
-        <div class="container">
-            <p>&copy; 2026 {{ name }}. Fakultas Ilmu Komputer, Universitas Indonesia.</p>
-        </div>
-    </footer>
-</body>
-</html>
+    {% include 'skills.html' %}
+{% endblock %}
