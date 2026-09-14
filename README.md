@@ -13,3 +13,16 @@ Kelas : PBP F
 
 Link AI Gemini: https://share.gemini.google/8Z5QrcVPK2Ot
 Figma (unserious prototype): https://www.figma.com/proto/IZiorW1v0Emom9gu1nJZGP/myporto--?node-id=1-2&t=9DPZXGBu5VvgDBmr-1
+
+
+### Tugas 2
+1. Jelaskan alur yang terjadi ketika pengguna membuka halaman portofolio baru, mulai dari permintaan yang diterima proyek hingga data ditampilkan pada browser. Dalam jawabanmu, jelaskan peran urls.py proyek, urls.py aplikasi, view, model, dan template.
+Saat pengguna enter link portofolio ke browser, browser mengirimkan permintaan http ke server webservice (pws.cs.ui.ac.id untuk portofolio ini). Lalu urls.py proyek menangkap permintaan tersebut dan mengarahkan ke urls.py aplikasi untuk menampilkan landing page dan view-view selanjutnya yang diinginkan user. Saat pengguna ingin melihat bagian lain seperti experiences atau projects, url.py mengarahkan ke view experiences atau projects. View akan menghubungi model sesuai yang dihubungkan dengan view tersebut (ditandai melalui syntax Experience.objects.all). Setelah view mengumpulkan seluruh data di context, fungsi di view akan render template html yang akan ditampilkan untuk merepresentasikan datanya.
+
+2. Mengapa data untuk bagian portofolio baru sebaiknya disimpan pada model dan tidak ditulis langsung di dalam template? Jelaskan dampaknya terhadap kemudahan pemeliharaan dan pengembangan aplikasi.
+Jika ditulis langsung di dalam template (hardcode), akan menyulitkan proses pengembangan di kemudian hari karena kode harus diketik manual dan bisa saja berpengaruh buruk pada kode lain yang sudah baik sebelumnya, yang menyebabkan kode harus disesuaikan lagi. Pemeliharaan juga akan menjadi lebih sulit karena kode akan menjadi sangat banyak (spaghetti code). Dengan disimpan pada model, data portofolio yang akan ditambah hanya perlu diisi melalui shell/django admin dan akan ditambah otomatis sesuai ketentuan di model, view, dan html. 
+
+3. Apa perbedaan fungsi makemigrations dan migrate pada Django? Berikan contoh perubahan model yang mengharuskanmu menjalankan kedua perintah tersebut.
+makemigrations berfungsi untuk mencatat perubahan pada model dan membuat blueprint perubahan yang dimasukkan ke folder migrations. Selanjutnya untuk mengeksekusi perubahan model, perlu diketikkan migrate sehingga blueprint akan dieksekusi ke database db.sqlite3. Contoh perubahan model yang mengharuskan dijalankan kedua instruksi tersebut adakah saat menambah, menghapus, atau mengubah struktur field/kolom data di dalam model
+
+Link AI Gemini: https://share.gemini.google/4GiuYLARFaRh
