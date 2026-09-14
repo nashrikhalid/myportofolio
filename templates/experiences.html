@@ -2,42 +2,44 @@
 {% block content %}
     <section class="experiences-section" id="experiences">
         <div class="container">
-            <div class="experiences-wrapper"></div>
-                <h2>Experiences and Activities</h2>
+            <h2>Experiences and Activities</h2>
 
-                <div class="experience-wrapper">
-                    {% for experience in experience_list %}
-                        <div class="experience-block glass-card">
-                            <div class="time-block">
-                                <p class="time">
-                                    {{ experience.started_at|date:"M Y" }} - 
-                                    {% if experience.is_ongoing %}
-                                        Present
-                                    {% else %}
-                                        {{ experience.ended_at|date:"M Y" }}
-                                    {% endif %}
-                                </p>
-                                <span class="experience-category glass-card">
-                                    {{ experience.get_category_display }}
-                                </span>
-                            </div>
-                            <h3>{{ experience.title }}</h3>
-                            <h4>{{ experience.org }}</h4>
-                            <ul>
-                                <li>{{ experience.description }}</li>
-                            </ul>
-                        </div>
-                    {% empty %}
-                        <div class="experience-block glass-card"></div>
-                            <p class="empty-state">
-                                Belum ada pengalaman yang ditambahkan.
+            <div class="experience-wrapper">
+                {% for experience in experience_list %}
+                    <div class="experience-block glass-card">
+                        <div class="time-block">
+                            <p class="time">
+                                {{ experience.started_at|date:"M Y" }} - 
+                                {% if experience.is_ongoing %}
+                                    Present
+                                {% else %}
+                                    {{ experience.ended_at|date:"M Y" }}
+                                {% endif %}
                             </p>
+                            <span class="experience-category glass-card">
+                                {{ experience.get_category_display }}
+                            </span>
+                        </div>
+                        <h3>{{ experience.title }}</h3>
+                        <h4>{{ experience.org }}</h4>
+                        <ul>
+                            {% for line in experience.description_lines %}
+                                <li>{{ line }}</li>
+                            {% endfor %}
+                        </ul>
+                    </div>
+                {% empty %}
+                    <div class="experience-block glass-card">
+                        <p class="empty-state">
+                            Belum ada pengalaman yang ditambahkan.
+                        </p>
                     </div>
                 {% endfor %}
-                </div>
-                <div class="experience-block glass-card">
+
+                <div class="more-to-come-block">
                     <p class="more-to-come">More to come...</p>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 {% endblock %}
