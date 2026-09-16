@@ -1,3 +1,5 @@
+import os
+from django.conf import settings
 from django.shortcuts import render
 from main.models import Experience
 from main.models import Project
@@ -7,6 +9,28 @@ from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
 from main.forms import ProjectForm
+
+
+def is_authorized(request):
+    secret = getattr(settings, 'PORTFOLIO_SECRET', os.getenv('PORTFOLIO_SECRET', 'rahasia123'))
+
+    # 1. Cek custom header pada request (misal: X-Secret-Key)
+    header_secret = (
+        request.headers.get("X-Secret-Key")
+        or request.headers.get("X-Portfolio-Secret")
+        or request.headers.get("X-Admin-Secret")
+        or request.headers.get("Secret-Key")
+        or request.META.get("HTTP_X_SECRET_KEY")
+    )
+    if header_secret and header_secret == secret:
+        return True
+
+    # 2. Cek field password pada form (POST)
+    post_password = request.POST.get("password")
+    if post_password and post_password == secret:
+        return True
+
+    return False
 
 
 def show_main(request):
@@ -62,10 +86,14 @@ def show_skill(request):
 def create_project(request):
     form = ProjectForm(request.POST or None)
 
-    if request.method == "POST" and form.is_valid():
-        form.save()
-        messages.success(request, "Proyek baru berhasil ditambahkan!")
-        return redirect("main:show_project")
+    if request.method == "POST":
+        if not is_authorized(request):
+            form.add_error("password", "Kode rahasia atau password salah!")
+            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
+        elif form.is_valid():
+            form.save()
+            messages.success(request, "Proyek baru berhasil ditambahkan!")
+            return redirect("main:show_project")
 
     context = {
         "name": "Nashri",
@@ -87,6 +115,10 @@ def delete_project(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
 
     if request.method == "POST":
+        if not is_authorized(request):
+            messages.error(request, "Akses ditolak: Kode rahasia atau password salah!")
+            return redirect("main:show_project")
+
         project.delete()
         messages.success(request, "Project berhasil dihapus!")
         return redirect("main:show_project")

@@ -821,17 +821,18 @@ p {
         font-size: 0.75rem;
         padding: 1rem;
     }
+}
 
-    /* --- Projects Form --- */
-    .project-form {
+/* --- Projects Form --- */
+.project-form {
     width: 100%;
     max-width: 100%;
     margin-top: 1.5rem;
-    }
+}
 
-    .form-group {
-        margin-bottom: 1.25rem;
-    }
+.form-group {
+    margin-bottom: 1.25rem;
+}
 
     .form-group label {
         display: block;
@@ -881,7 +882,6 @@ p {
     .button-secondary {
         background: var(--ink);
     }
-}
 
     .project-add-button {
     display: inline-flex;

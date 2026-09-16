@@ -19,6 +19,7 @@ load_dotenv()
 ALLOWED_HOSTS = ["localhost", "127.0.0.1", "nashri-khalid-myportofolio.pws.cs.ui.ac.id"]
 
 PRODUCTION = os.getenv('PRODUCTION', 'False').lower() == 'true'
+PORTFOLIO_SECRET = os.getenv('PORTFOLIO_SECRET', 'rahasia123')
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent

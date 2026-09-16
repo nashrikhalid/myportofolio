@@ -1,8 +1,30 @@
-from django.forms import ModelForm, TextInput, Textarea, URLInput
+from django import forms
+from django.forms import ModelForm, TextInput, Textarea, URLInput, PasswordInput
 
 from main.models import Project
 
 class ProjectForm(ModelForm):
+    password = forms.CharField(
+        widget=PasswordInput(
+            attrs={
+                "placeholder": "Masukkan kode rahasia / password",
+                "autocomplete": "current-password",
+            }
+        ),
+        label="Password Rahasia",
+        required=False,
+        help_text="Masukkan kode rahasia yang terdaftar di .env",
+    )
+
+    field_order = [
+        "title",
+        "description",
+        "tech_stack",
+        "project_url",
+        "project_image_url",
+        "password",
+    ]
+
     class Meta:
         model = Project
         fields = [

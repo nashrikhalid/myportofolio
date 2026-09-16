@@ -26,6 +26,15 @@
     </header>
 
     <main>
+        {% if messages %}
+            <div class="container" style="padding-top: 1.5rem;">
+                {% for message in messages %}
+                    <div class="alert alert-{{ message.tags }}" style="padding: 0.85rem 1.25rem; margin-bottom: 1rem; border-radius: var(--radius); background: {% if message.tags == 'error' %}rgba(180, 35, 24, 0.9){% else %}rgba(16, 185, 129, 0.9){% endif %}; color: white; font-weight: 500; backdrop-filter: blur(8px); box-shadow: 0 4px 15px rgba(0,0,0,0.2);">
+                        {{ message }}
+                    </div>
+                {% endfor %}
+            </div>
+        {% endif %}
         {% block content %}
 
         {% endblock %}
