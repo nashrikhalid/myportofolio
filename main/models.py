@@ -35,9 +35,12 @@ class Experience(models.Model):
 
 class Project(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
-    preview = models.CharField(max_length=255, default='/static/img/example.png')
     title = models.CharField(max_length=255, default='Coming soon')
     description = models.TextField(default='Coming very soon')
+    project_url = models.URLField(blank=True, null=True)
+    tech_stack = models.CharField(max_length=255, blank=True, null=True)
+    project_image_url = models.URLField(blank=True, max_length=500)
+    
     def __str__(self):
         return self.title
 

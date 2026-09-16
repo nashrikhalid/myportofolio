@@ -8,13 +8,22 @@
             <div class="project-wrapper">
                 {% for project in project_list %}
                     <div class="project-block glass-card">
-                        {% if project.preview %}
-                            <img class="project-photo" src="{{ project.preview }}" alt="Photo of {{ project.title }}">
-                        {% else %}
-                            <img class="project-photo" src="{% static 'img/example.png' %}" alt="Default Project Photo">
+                        {% if project.project_image_url %}
+                            <img src="{{ project.project_image_url }}"
+                                     alt="Gambar {{ project.title }}"
+                                     class="project-photo">
                         {% endif %}
                         <h3>{{ project.title }}</h3>
+                        <span class="experience-category">{{ project.tech_stack }}</span>
                         <p>{{ project.description }}</p>
+                        <div class="project-card-actions">
+                            <div class="project-actions">
+                                {% if project.project_url %}
+                                    <a href="{{ project.project_url }}" class="button">Lihat Project</a>
+                                {% endif %}
+                                {% include "components/project_delete_modal.html" with project=project %}
+                            </div>
+                        </div>
                     </div>
                 {% empty %}
                     <div class="project-block glass-card">
