@@ -156,9 +156,10 @@ class SkillForm(ModelForm):
                     "maxlength": 255,
                 }
             ),
-            "logo": URLInput(
+            "logo": TextInput(
                 attrs={
-                    "placeholder": "Google Drive Link",
+                    "placeholder": "fa-brands fa-python (Font Awesome) atau URL gambar",
+                    "maxlength": 100,
                 }
             ),
         }

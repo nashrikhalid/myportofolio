@@ -8,7 +8,7 @@ from django.contrib import messages
 from django.core import serializers
 from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect
-from main.forms import ProjectForm, ExperienceForm
+from main.forms import ProjectForm, ExperienceForm, SkillForm
 
 
 def is_authorized(request):
@@ -87,9 +87,18 @@ def show_project(request):
     return render(request, "projects.html", context)
 
 def show_skill(request):
+    json_response = get_skills_json(request)
+    skills = serializers.deserialize(
+        "json",
+        json_response.content.decode("utf-8"),
+    )
+    skills = [s.object for s in skills]
+    name_query = request.GET.get("name", "").strip()
+
     context = {
         "name": "Nashri",
-        "skill_list": Skill.objects.all(),
+        "skill_list": skills,
+        "name_query": name_query,
     }
     return render(request, "skills.html", context)
 
@@ -134,6 +143,26 @@ def delete_project(request, project_id):
         return redirect("main:show_project")
 
     return redirect("main:show_project")
+
+def update_project(request, project_id):
+    project = get_object_or_404(Project, pk=project_id)
+    form = ProjectForm(request.POST or None, instance=project)
+
+    if request.method == "POST":
+        if not is_authorized(request):
+            form.add_error("password", "Kode rahasia atau password salah!")
+            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
+        elif form.is_valid():
+            form.save()
+            messages.success(request, "Proyek berhasil diperbarui!")
+            return redirect("main:show_project")
+
+    context = {
+        "name": "Nashri",
+        "form": form,
+        "project": project,
+    }
+    return render(request, "projects_form.html", context)
 
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
@@ -196,3 +225,65 @@ def delete_experience(request, experience_id):
         return redirect("main:show_experience")
 
     return redirect("main:show_experience")
+
+def create_skill(request):
+    form = SkillForm(request.POST or None)
+
+    if request.method == "POST":
+        if not is_authorized(request):
+            form.add_error("password", "Kode rahasia atau password salah!")
+            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
+        elif form.is_valid():
+            form.save()
+            messages.success(request, "Skill baru berhasil ditambahkan!")
+            return redirect("main:show_skill")
+
+    context = {
+        "name": "Nashri",
+        "form": form,
+    }
+    return render(request, "skills_form.html", context)
+
+def update_skill(request, skill_id):
+    skill = get_object_or_404(Skill, pk=skill_id)
+    form = SkillForm(request.POST or None, instance=skill)
+
+    if request.method == "POST":
+        if not is_authorized(request):
+            form.add_error("password", "Kode rahasia atau password salah!")
+            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
+        elif form.is_valid():
+            form.save()
+            messages.success(request, "Skill berhasil diperbarui!")
+            return redirect("main:show_skill")
+
+    context = {
+        "name": "Nashri",
+        "form": form,
+        "skill": skill,
+    }
+    return render(request, "skills_form.html", context)
+
+def get_skills_json(request):
+    name_query = request.GET.get("name", "").strip()
+    skills = Skill.objects.all()
+
+    if name_query:
+        skills = skills.filter(name__icontains=name_query)
+
+    skills_json = serializers.serialize("json", skills)
+    return HttpResponse(skills_json, content_type="application/json")
+
+def delete_skill(request, skill_id):
+    skill = get_object_or_404(Skill, pk=skill_id)
+
+    if request.method == "POST":
+        if not is_authorized(request):
+            messages.error(request, "Akses ditolak: Kode rahasia atau password salah!")
+            return redirect("main:show_skill")
+
+        skill.delete()
+        messages.success(request, "Skill berhasil dihapus!")
+        return redirect("main:show_skill")
+
+    return redirect("main:show_skill")

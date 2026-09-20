@@ -1,12 +1,22 @@
 
     <section class="skills-section" id="skills">
         <div class="container">
-            <h2>Skills</h2>
+            <!-- Header dengan Tombol Tambah -->
+            <div class="skill-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Skills</h2>
+                <a href="{% url 'main:create_skill' %}" class="button skill-add-button">
+                    <span aria-hidden="true">+</span> Tambah Skill
+                </a>
+            </div>
+
+            <!-- Wrapper Skills -->
             <div class="skills-wrapper">
                 {% for skill in skill_list %}
-                <div class="skill glass-card" aria-label="{{skill.name}}">
-                    <span class="{{ skill.logo }}"></span>
-                </div>
+                    <div class="skill glass-card" aria-label="{{ skill.name }}">
+                        <span class="{{ skill.logo }}"></span>
+                    </div>
+                {% empty %}
+                    <p>Belum ada skill yang ditambahkan.</p>
                 {% endfor %}
             </div>
         </div>
