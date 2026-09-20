@@ -26,3 +26,16 @@ Jika ditulis langsung di dalam template (hardcode), akan menyulitkan proses peng
 makemigrations berfungsi untuk mencatat perubahan pada model dan membuat blueprint perubahan yang dimasukkan ke folder migrations. Selanjutnya untuk mengeksekusi perubahan model, perlu diketikkan migrate sehingga blueprint akan dieksekusi ke database db.sqlite3. Contoh perubahan model yang mengharuskan dijalankan kedua instruksi tersebut adakah saat menambah, menghapus, atau mengubah struktur field/kolom data di dalam model
 
 Link AI Gemini: https://share.gemini.google/4GiuYLARFaRh
+
+
+### Tugas 3
+1. Jelaskan mengapa kita menggunakan ModelForm pada Django alih-alih membuat form HTML secara manual. Selain itu, jelaskan pula mengapa kita diwajibkan menambahkan {% csrf_token %} pada form tersebut!
+...
+
+2. Pada Tutorial 03, kita membahas format data JSON dan XML. Mengapa JSON lebih disukai dalam pengembangan aplikasi web modern dibandingkan XML?
+...
+
+3. Jelaskan alur yang terjadi saat kamu menggunakan fungsi view untuk mengembalikan data portofoliomu dalam bentuk JSON. Mengapa kita perlu melakukan proses serialization pada model Django sebelum datanya dikembalikan?
+...
+
+Link AI Gemini: 
