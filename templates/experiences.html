@@ -2,7 +2,22 @@
 {% block content %}
     <section class="experiences-section" id="experiences">
         <div class="container">
-            <h2>Experiences and Activities</h2>
+            <div class="project-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Experiences and Activities</h2>
+                <a href="{% url 'main:create_experience' %}" class="button project-add-button">
+                    <span aria-hidden="true">+</span> Tambah Pengalaman
+                </a>
+            </div>
+
+            <form method="get" action="{% url 'main:show_experience' %}" class="project-search">
+                <input type="search"
+                       name="title"
+                       value="{{ title_query }}"
+                       placeholder="Cari berdasarkan nama pengalaman"
+                       class="project-search__input"
+                       aria-label="Cari berdasarkan nama pengalaman">
+                <button type="submit" class="button">Cari</button>
+            </form>
 
             <div class="experience-wrapper">
                 {% for experience in experience_list %}
@@ -27,12 +42,18 @@
                                 <li>{{ line }}</li>
                             {% endfor %}
                         </ul>
+                        <div class="project-actions" style="margin-top: 1rem;">
+                            <a href="{% url 'main:update_experience' experience.id %}" class="button button-secondary" style="font-size: 0.85rem;">Edit</a>
+                            {% include "components/experience_delete_modal.html" with experience=experience %}
+                        </div>
                     </div>
                 {% empty %}
                     <div class="experience-block glass-card">
-                        <p class="empty-state">
-                            Belum ada pengalaman yang ditambahkan.
-                        </p>
+                        {% if title_query %}
+                            <p class="empty-state">Tidak ada pengalaman dengan nama tersebut.</p>
+                        {% else %}
+                            <p class="empty-state">Belum ada pengalaman yang ditambahkan.</p>
+                        {% endif %}
                     </div>
                 {% endfor %}
 

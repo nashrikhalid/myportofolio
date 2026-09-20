@@ -1,0 +1,55 @@
+<p class="experience-status" style="margin-top: 0;">
+    <button type="button"
+            class="button button-danger"
+            popovertarget="delete-experience-{{ experience.id }}"
+            aria-label="Hapus {{ experience.title }}"
+            title="Hapus Pengalaman"
+            style="font-size: 0.85rem;">
+        Hapus
+    </button>
+</p>
+<div id="delete-experience-{{ experience.id }}"
+     class="project-delete-modal"
+     popover="auto"
+     role="dialog"
+     aria-modal="true"
+     aria-labelledby="delete-experience-title-{{ experience.id }}">
+    <button type="button"
+            class="project-delete-modal__backdrop"
+            popovertarget="delete-experience-{{ experience.id }}"
+            popovertargetaction="hide"
+            aria-label="Tutup konfirmasi hapus"></button>
+    <div class="project-delete-modal__content">
+        <button type="button"
+                class="project-delete-modal__close"
+                popovertarget="delete-experience-{{ experience.id }}"
+                popovertargetaction="hide"
+                aria-label="Tutup konfirmasi hapus">×</button>
+        <h2 id="delete-experience-title-{{ experience.id }}">Hapus Pengalaman?</h2>
+        <p>
+            Apakah Anda yakin ingin menghapus
+            <strong>{{ experience.title }}</strong>?
+        </p>
+        <form method="post" action="{% url 'main:delete_experience' experience.id %}" style="margin-top: 1rem;">
+            {% csrf_token %}
+            <div class="form-group" style="margin-bottom: 1.25rem; text-align: left;">
+                <label for="password-delete-exp-{{ experience.id }}" style="display: block; margin-bottom: 0.4rem; font-size: 0.9rem; font-weight: 600;">
+                    Password Rahasia:
+                </label>
+                <input type="password"
+                       id="password-delete-exp-{{ experience.id }}"
+                       name="password"
+                       placeholder="Masukkan kode rahasia"
+                       required
+                       style="width: 100%; box-sizing: border-box; padding: 0.7rem; border: 1px solid var(--accent); border-radius: var(--radius); background: rgba(255, 255, 255, 0.08); color: var(--ink);">
+            </div>
+            <div class="project-delete-modal__actions">
+                <button type="button"
+                        class="button button-secondary"
+                        popovertarget="delete-experience-{{ experience.id }}"
+                        popovertargetaction="hide">Batal</button>
+                <button type="submit" class="button button-danger">Ya, Hapus</button>
+            </div>
+        </form>
+    </div>
+</div>

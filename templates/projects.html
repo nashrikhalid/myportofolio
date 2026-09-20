@@ -4,7 +4,23 @@
 {% block content %}
     <section class="projects-section" id="projects">
         <div class="container">
-            <h2>Projects</h2>
+            <div class="project-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h2>Projects</h2>
+                <a href="{% url 'main:create_project' %}" class="button project-add-button">
+                    <span aria-hidden="true">+</span> Tambah Proyek
+                </a>
+            </div>
+
+            <form method="get" action="{% url 'main:show_project' %}" class="project-search">
+                <input type="search"
+                       name="title"
+                       value="{{ title_query }}"
+                       placeholder="Cari berdasarkan nama proyek"
+                       class="project-search__input"
+                       aria-label="Cari berdasarkan nama proyek">
+                <button type="submit" class="button">Cari</button>
+            </form>
+
             <div class="project-wrapper">
                 {% for project in project_list %}
                     <div class="project-block glass-card">

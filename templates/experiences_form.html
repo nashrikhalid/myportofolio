@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block meta %}
+    <title>{% if experience %}Edit{% else %}Tambah{% endif %} Pengalaman - {{ name }}</title>
+{% endblock meta %}
+{% block content %}
+    <section class="experience-section" style="padding: 2rem 0;">
+        <div class="container">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
+                <h1>{% if experience %}Edit Pengalaman{% else %}Tambah Pengalaman Baru{% endif %}</h1>
+                <a href="{% url 'main:show_experience' %}" class="button button-secondary">Kembali</a>
+            </div>
+            <form method="post" class="project-form">
+                {% csrf_token %}
+                {% for field in form %}
+                    <div class="form-group" style="margin-bottom: 1.25rem;">
+                        <label for="{{ field.id_for_label }}" style="display: block; margin-bottom: 0.4rem; font-weight: 700;">{{ field.label }}</label>
+                        {{ field }}
+                        {% if field.help_text %}
+                            <p style="font-size: 0.8rem; color: var(--accent); margin-top: 0.25rem;">{{ field.help_text }}</p>
+                        {% endif %}
+                        {% for error in field.errors %}
+                            <p class="form-error">{{ error }}</p>
+                        {% endfor %}
+                    </div>
+                {% endfor %}
+                <div style="display: flex; gap: 0.75rem; margin-top: 1.5rem;">
+                    <button type="submit" class="button">{% if experience %}Simpan Perubahan{% else %}Tambah Pengalaman{% endif %}</button>
+                    <a href="{% url 'main:show_experience' %}" class="button button-secondary">Batal</a>
+                </div>
+            </form>
+        </div>
+    </section>
+{% endblock content %}
