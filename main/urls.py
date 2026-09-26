@@ -1,6 +1,10 @@
 from django.urls import path
 
 from main.views import (
+    login_user,
+    logout_user,
+    register,
+    toggle_star,
     show_main,
     show_experience,
     show_project,
@@ -28,6 +32,7 @@ urlpatterns = [
     path("skill/", show_skill, name="show_skill"),
     # Projects
     path("projects/add/", create_project, name="create_project"),
+    path("projects/<uuid:project_id>/star/", toggle_star, name="toggle_star"),
     path("projects/<uuid:project_id>/edit/", update_project, name="update_project"),
     path("projects/<uuid:project_id>/delete/", delete_project, name="delete_project"),
     path("api/projects/", get_projects_json, name="get_projects_json"),
@@ -41,4 +46,7 @@ urlpatterns = [
     path("skill/<uuid:skill_id>/edit/", update_skill, name="update_skill"),
     path("skill/<uuid:skill_id>/delete/", delete_skill, name="delete_skill"),
     path("api/skills/", get_skills_json, name="get_skills_json"),
+    path("login/", login_user, name="login"),
+    path("logout/", logout_user, name="logout"),
+    path("register/", register, name="register"),
 ]

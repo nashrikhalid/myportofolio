@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Experience - {{ fullname }}</title>
+    {% block meta %}<title>Portfolio - {{ name }}</title>{% endblock meta %}
     <link rel="stylesheet" href="{% static 'css/style.css' %}?v=1.2">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -21,6 +21,13 @@
                 <a href="{% url 'main:show_main' %}#skills">Skills</a>
                 <a href="{% url 'main:show_project' %}">Projects</a>
                 <a href="{% url 'main:show_experience' %}">Experiences</a>
+                    {% if user.is_authenticated %}
+                        <span class="nav-user">{{ user.username }}</span>
+                        <a href="{% url 'main:logout' %}">Logout</a>
+                    {% else %}
+                        <a href="{% url 'main:login' %}">Login</a>
+                        <a href="{% url 'main:register' %}">Register</a>
+                    {% endif %}
             </nav>
         </div>
     </header>

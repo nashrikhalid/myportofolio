@@ -4,17 +4,6 @@ from django.forms import ModelForm, TextInput, Textarea, URLInput, PasswordInput
 from main.models import Project, Skill, Experience
 
 class ProjectForm(ModelForm):
-    password = forms.CharField(
-        widget=PasswordInput(
-            attrs={
-                "placeholder": "Masukkan kode rahasia / password",
-                "autocomplete": "current-password",
-            }
-        ),
-        label="Password Rahasia",
-        required=False,
-    )
-
     class Meta:
         model = Project
         fields = [

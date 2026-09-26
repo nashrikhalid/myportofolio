@@ -1,15 +1,13 @@
 {% extends "base.html" %}
 {% block meta %}
-    <title>{% if project %}Edit{% else %}Add{% endif %} Project - {{ name }}</title>
+    <title>Login - {{ name }}</title>
 {% endblock meta %}
 {% block content %}
     <main>
         <section class="experience-section">
             <div class="container">
-                <h1>{% if project %}Edit Project{% else %}Add New Projects{% endif %}</h1>
-                <form method="post"
-                      action="{% if project %}{% url 'main:update_project' project.id %}{% else %}{% url 'main:create_project' %}{% endif %}"
-                      class="project-form">
+                <h1>Login</h1>
+                <form method="post" action="{% url 'main:login' %}" class="project-form">
                     {% csrf_token %}
                     {% for field in form %}
                         <div class="form-group">
@@ -20,9 +18,12 @@
                             {% endfor %}
                         </div>
                     {% endfor %}
-                    <button type="submit" class="button">{% if project %}Simpan Perubahan{% else %}Tambah Project{% endif %}</button>
-                    <a href="{% url 'main:show_project' %}" class="button button-secondary">Batal</a>
+                    {% for error in form.non_field_errors %}
+                        <p class="form-error">{{ error }}</p>
+                    {% endfor %}
+                    <button type="submit" class="button">Login</button>
                 </form>
+                <p>Belum punya akun? <a href="{% url 'main:register' %}">Daftar di sini</a>.</p>
             </div>
         </section>
     </main>
