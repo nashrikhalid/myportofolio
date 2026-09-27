@@ -45,3 +45,8 @@ Misalnya, untuk get_projects_json:
 Di tutorial 3, show_projects juga memanggil get_projects_json, lalu hasilnya di-deserialize lagi jadi objek Python dan dikirim ke template. Kelihatannya berputar-putar, tapi ini meniru skenario nyata saat client dan server terpisah. Serialization diperlukan karena QuerySet dan objek model itu objek Python yang hidup di memori server, sedangkan HTTP hanya mengirim teks/byte. Data harus diubah dulu ke format standar yang tidak bergantung pada bahasa, supaya client mana pun (JavaScript, aplikasi mobile, dll.) bisa membacanya. Serializer Django juga menangani tipe data yang tidak bisa langsung dijadikan JSON oleh json.dumps biasa, seperti UUIDField atau tanggal, dan membungkus setiap data dengan struktur model, pk, dan fields.
 
 Link AI Gemini: https://share.gemini.google/TEAkHw9YbMLZ
+
+## Tutorial 4 Opsional
+
+Skrip pengujian browser dan eksperimen intersepsi CSRF tersedia dalam [panduan Selenium dan Burp Suite](docs/tutorial4-optional.md). Jalankan dengan virtual environment aktif: python test_e2e.py --headless atau python test_e2e.py --burp.
+

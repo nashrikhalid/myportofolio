@@ -1,4 +1,6 @@
 # Django
+.local-tools/
+artifacts/
 *.log
 *.pot
 *.pyc

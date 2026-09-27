@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
-
+    
 def logout_user(request):
     logout(request)
     response = redirect("main:show_main")
