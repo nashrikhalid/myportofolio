@@ -1,4 +1,4 @@
-from django.forms import ModelForm, TextInput, Textarea, URLInput, Select, DateInput
+from django.forms import ModelForm, TextInput, Textarea, URLInput, Select, DateInput, DateTimeField
 
 from main.models import Project, Skill, Experience
 
@@ -52,6 +52,19 @@ class ProjectForm(ModelForm):
         }
 
 class ExperienceForm(ModelForm):
+    started_at = DateTimeField(
+        label="Bulan dan tahun mulai",
+        input_formats=["%Y-%m"],
+        widget=DateInput(format="%Y-%m", attrs={"type": "month"}),
+    )
+    ended_at = DateTimeField(
+        label="Bulan dan tahun berakhir",
+        required=False,
+        input_formats=["%Y-%m"],
+        widget=DateInput(format="%Y-%m", attrs={"type": "month"}),
+        help_text="Kosongkan jika pengalaman masih berlangsung.",
+    )
+
     class Meta:
         model = Experience
         fields = [
@@ -92,16 +105,6 @@ class ExperienceForm(ModelForm):
                 }
             ),
             "category": Select(),
-            "started_at": DateInput(
-                attrs={
-                    "type": "date",
-                }
-            ),
-            "ended_at": DateInput(
-                attrs={
-                    "type": "date",
-                }
-            ),
         }
 
 class SkillForm(ModelForm):

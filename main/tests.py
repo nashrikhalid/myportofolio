@@ -71,7 +71,7 @@ class AssignmentFourTest(TestCase):
     def resources(self):
         return [
             ("project", self.project, {"title": "Changed project", "description": "Updated"}),
-            ("experience", self.experience, {"title": "Changed experience", "org": "UI", "description": "Updated", "category": "research", "started_at": "2026-09-01", "ended_at": ""}),
+            ("experience", self.experience, {"title": "Changed experience", "org": "UI", "description": "Updated", "category": "research", "started_at": "2026-09", "ended_at": ""}),
             ("skill", self.skill, {"name": "Changed skill", "logo": "fa-python"}),
         ]
 
@@ -368,3 +368,30 @@ class TutorialFourTest(TestCase):
         self.assertEqual(client.post(star_url, HTTP_X_CSRFTOKEN=token).status_code, 302)
         self.assertTrue(self.project.starred_by.filter(pk=self.owner.pk).exists())
 
+
+
+class ExperienceMonthFormTest(TestCase):
+    def data(self, end=""):
+        return {"title": "Internship", "org": "UI", "description": "Research", "category": "internship", "started_at": "2026-09", "ended_at": end}
+
+    def test_month_input_saves_and_renders_for_edit(self):
+        from main.forms import ExperienceForm
+        form = ExperienceForm(self.data("2026-12"))
+        self.assertTrue(form.is_valid(), form.errors)
+        experience = form.save()
+        self.assertEqual((experience.started_at.year, experience.started_at.month, experience.started_at.day), (2026, 9, 1))
+        self.assertEqual((experience.ended_at.year, experience.ended_at.month), (2026, 12))
+        edit = ExperienceForm(instance=experience)
+        self.assertIn('type="month"', str(edit["started_at"]))
+        self.assertIn('value="2026-09"', str(edit["started_at"]))
+        self.assertIn('value="2026-12"', str(edit["ended_at"]))
+
+    def test_ongoing_and_invalid_month(self):
+        from main.forms import ExperienceForm
+        form = ExperienceForm(self.data())
+        self.assertTrue(form.is_valid(), form.errors)
+        self.assertIsNone(form.save().ended_at)
+        invalid = self.data("2026-13")
+        form = ExperienceForm(invalid)
+        self.assertFalse(form.is_valid())
+        self.assertIn("ended_at", form.errors)
