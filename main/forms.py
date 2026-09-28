@@ -1,5 +1,4 @@
-from django import forms
-from django.forms import ModelForm, TextInput, Textarea, URLInput, PasswordInput, Select, DateInput
+from django.forms import ModelForm, TextInput, Textarea, URLInput, Select, DateInput
 
 from main.models import Project, Skill, Experience
 
@@ -53,16 +52,6 @@ class ProjectForm(ModelForm):
         }
 
 class ExperienceForm(ModelForm):
-    password = forms.CharField(
-        widget=PasswordInput(
-            attrs={
-                "placeholder": "Masukkan kode rahasia / password",
-                "autocomplete": "current-password",
-            }
-        ),
-        label="Password Rahasia",
-        required=False,
-    )
     class Meta:
         model = Experience
         fields = [
@@ -116,16 +105,6 @@ class ExperienceForm(ModelForm):
         }
 
 class SkillForm(ModelForm):
-    password = forms.CharField(
-        widget=PasswordInput(
-            attrs={
-                "placeholder": "Masukkan kode rahasia / password",
-                "autocomplete": "current-password",
-            }
-        ),
-        label="Password Rahasia",
-        required=False,
-    )
     class Meta:
         model = Skill
         fields = [
