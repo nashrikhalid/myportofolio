@@ -22,6 +22,13 @@ class Experience(models.Model):
     category = models.CharField(max_length=20, choices=EXPERIENCE_CHOICES, default='full-time')
     started_at = models.DateTimeField(default=timezone.now)
     ended_at = models.DateTimeField(blank=True, null=True)
+    from django.contrib.auth.models import User
+
+    starred_by = models.ManyToManyField(
+        User,
+        related_name="starred_experiences",
+        blank=True,
+    )
 
     def __str__(self):
         return self.title

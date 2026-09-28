@@ -108,6 +108,7 @@ def show_experience(request):
         "name": "Nashri",
         "experience_list": experiences,
         "title_query": title_query,
+        "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
     return render(request, "experiences.html", context)
 
@@ -121,6 +122,7 @@ def show_project(request):
         "name": "Nashri",
         "project_list": projects,
         "title_query": title_query,
+        "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
     return render(request, "projects.html", context)
 
@@ -137,6 +139,7 @@ def show_skill(request):
         "name": "Nashri",
         "skill_list": skills,
         "name_query": name_query,
+        "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
     return render(request, "skills.html", context)
 
@@ -202,22 +205,39 @@ def update_project(request, project_id):
     }
     return render(request, "projects_form.html", context)
 
+def toggle_star_for_user(obj, user):
+    if obj.starred_by.filter(pk=user.pk).exists():
+        obj.starred_by.remove(user)
+    else:
+        obj.starred_by.add(user)
+
 @login_required(login_url="main:login")
-def toggle_star(request, project_id):
+def toggle_project_star(request, project_id):
     project = get_object_or_404(Project, pk=project_id)
+
     if request.method == "POST":
-        if project.starred_by.filter(pk=request.user.pk).exists():
-            project.starred_by.remove(request.user)
-        else:
-            project.starred_by.add(request.user)
+        toggle_star_for_user(project, request.user)
+
     return redirect("main:show_project")
+
+
+@login_required(login_url="main:login")
+def toggle_experience_star(request, experience_id):
+    experience = get_object_or_404(Experience, pk=experience_id)
+
+    if request.method == "POST":
+        toggle_star_for_user(experience, request.user)
+
+    return redirect("main:show_experience")
+
+
 
 
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
     if not request.user.is_superuser:
         raise PermissionDenied
-    form = ProjectForm(request.POST or None)
+    form = ExperienceForm(request.POST or None)
 
     if request.method == "POST":
         if not is_authorized(request):
@@ -288,7 +308,7 @@ def create_skill(request):
     form = SkillForm(request.POST or None)
     if not request.user.is_superuser:
         raise PermissionDenied
-    form = ProjectForm(request.POST or None)
+    form = SkillForm(request.POST or None)
 
     if request.method == "POST":
         if not is_authorized(request):

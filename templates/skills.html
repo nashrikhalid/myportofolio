@@ -4,9 +4,11 @@
             <!-- Header dengan Tombol Tambah -->
             <div class="skill-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
                 <h2>Skills</h2>
-                <a href="{% url 'main:create_skill' %}" class="button skill-add-button">
-                    <span aria-hidden="true">+</span> Tambah Skill
-                </a>
+                {% if user.is_superuser %}
+                    <a href="{% url 'main:create_skill' %}" class="button skill-add-button">
+                        <span aria-hidden="true">+</span> Tambah Skill
+                    </a>
+                {% endif %}
             </div>
 
             <!-- Wrapper Skills -->
@@ -16,10 +18,12 @@
                         <div class="skill glass-card" aria-label="{{ skill.name }}" title="{{ skill.name }}">
                             <span class="{{ skill.logo }}"></span>
                         </div>
-                        {% if user.is_superuser %}
+                        {% if user.is_superuser or user.is_editor %}
                             <a href="{% url 'main:update_skill' skill.id %}"
-                               class="button button-secondary skill-edit-button"
+                               class="button"
                                aria-label="Edit {{ skill.name }}">Edit</a>
+                        {% endif %}
+                        {% if user.is_superuser %}
                             {% include "components/skill_delete_modal.html" with skill=skill %}
                         {% endif %}
                     </div>
