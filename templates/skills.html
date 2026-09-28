@@ -12,8 +12,16 @@
             <!-- Wrapper Skills -->
             <div class="skills-wrapper">
                 {% for skill in skill_list %}
-                    <div class="skill glass-card" aria-label="{{ skill.name }}">
-                        <span class="{{ skill.logo }}"></span>
+                    <div class="skill-item">
+                        <div class="skill glass-card" aria-label="{{ skill.name }}" title="{{ skill.name }}">
+                            <span class="{{ skill.logo }}"></span>
+                        </div>
+                        {% if user.is_superuser %}
+                            <a href="{% url 'main:update_skill' skill.id %}"
+                               class="button button-secondary skill-edit-button"
+                               aria-label="Edit {{ skill.name }}">Edit</a>
+                            {% include "components/skill_delete_modal.html" with skill=skill %}
+                        {% endif %}
                     </div>
                 {% empty %}
                     <p>Belum ada skill yang ditambahkan.</p>

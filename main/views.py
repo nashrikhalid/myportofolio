@@ -16,7 +16,7 @@ from django.contrib.auth.decorators import login_required
 from django.core.exceptions import PermissionDenied
 from django.contrib.auth.forms import AuthenticationForm, UserCreationForm
 from django.shortcuts import redirect, render
-    
+
 def logout_user(request):
     logout(request)
     response = redirect("main:show_main")
@@ -183,7 +183,8 @@ def delete_project(request, project_id):
 
 @login_required(login_url="main:login")
 def update_project(request, project_id):
-    if not request.user.is_superuser:
+    is_editor = request.user.groups.filter(name="Editor").exists()
+    if not (request.user.is_superuser or is_editor):
         raise PermissionDenied
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(request.POST or None, instance=project)
@@ -214,6 +215,9 @@ def toggle_star(request, project_id):
 
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    form = ProjectForm(request.POST or None)
 
     if request.method == "POST":
         if not is_authorized(request):
@@ -231,6 +235,9 @@ def create_experience(request):
     return render(request, "experiences_form.html", context)
 
 def update_experience(request, experience_id):
+    is_editor = request.user.groups.filter(name="Editor").exists()
+    if not (request.user.is_superuser or is_editor):
+        raise PermissionDenied
     experience = get_object_or_404(Experience, pk=experience_id)
     form = ExperienceForm(request.POST or None, instance=experience)
 
@@ -262,6 +269,9 @@ def get_experiences_json(request):
 
 def delete_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    project = get_object_or_404(Experience, pk=experience_id)
 
     if request.method == "POST":
         if not is_authorized(request):
@@ -276,6 +286,9 @@ def delete_experience(request, experience_id):
 
 def create_skill(request):
     form = SkillForm(request.POST or None)
+    if not request.user.is_superuser:
+        raise PermissionDenied
+    form = ProjectForm(request.POST or None)
 
     if request.method == "POST":
         if not is_authorized(request):
@@ -293,6 +306,9 @@ def create_skill(request):
     return render(request, "skills_form.html", context)
 
 def update_skill(request, skill_id):
+    is_editor = request.user.groups.filter(name="Editor").exists()
+    if not (request.user.is_superuser or is_editor):
+        raise PermissionDenied
     skill = get_object_or_404(Skill, pk=skill_id)
     form = SkillForm(request.POST or None, instance=skill)
 
@@ -322,16 +338,14 @@ def get_skills_json(request):
     skills_json = serializers.serialize("json", skills)
     return HttpResponse(skills_json, content_type="application/json")
 
+@login_required(login_url="main:login")
 def delete_skill(request, skill_id):
+    if not request.user.is_superuser:
+        raise PermissionDenied
     skill = get_object_or_404(Skill, pk=skill_id)
 
     if request.method == "POST":
-        if not is_authorized(request):
-            messages.error(request, "Akses ditolak: Kode rahasia atau password salah!")
-            return redirect("main:show_skill")
-
         skill.delete()
         messages.success(request, "Skill berhasil dihapus!")
-        return redirect("main:show_skill")
 
-    return redirect("main:show_skill")
+    return redirect("/#skills")

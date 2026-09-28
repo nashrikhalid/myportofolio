@@ -351,6 +351,19 @@ p {
     gap: 1rem;
 }
 
+.skill-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.skill-edit-button,
+.skill-delete-button {
+    font-size: 0.75rem;
+    padding: 0.35rem 0.6rem;
+}
+
 .skill {
     width: 64px;
     height: 64px;

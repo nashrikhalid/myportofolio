@@ -5,6 +5,55 @@ from main.models import Experience
 from main.models import Project
 from django.contrib.auth.models import User
 from django.test import Client
+from main.models import Skill
+
+
+class SkillDeleteTest(TestCase):
+    def setUp(self):
+        self.skill = Skill.objects.create(name="Python", logo="fa-brands fa-python")
+        self.url = reverse("main:delete_skill", args=[self.skill.pk])
+        self.owner = User.objects.create_user("skill_owner", is_superuser=True)
+        self.visitor = User.objects.create_user("skill_visitor")
+
+    def test_delete_requires_superuser_even_with_secret(self):
+        response = self.client.post(self.url, {"password": "rahasia123"})
+        self.assertEqual(response.status_code, 302)
+        self.assertTrue(response.url.startswith(reverse("main:login") + "?next="))
+        self.client.force_login(self.visitor)
+        for method in (self.client.get, self.client.post):
+            self.assertEqual(method(self.url, HTTP_X_SECRET_KEY="rahasia123").status_code, 403)
+        self.assertTrue(Skill.objects.filter(pk=self.skill.pk).exists())
+
+    def test_owner_get_preserves_skill_and_post_deletes_it(self):
+        self.client.force_login(self.owner)
+        self.client.get(self.url)
+        self.assertTrue(Skill.objects.filter(pk=self.skill.pk).exists())
+        response = self.client.post(self.url)
+        self.assertRedirects(response, "/#skills", fetch_redirect_response=False)
+        self.assertFalse(Skill.objects.filter(pk=self.skill.pk).exists())
+        self.assertContains(self.client.get(reverse("main:show_main")), "Skill berhasil dihapus!")
+
+    def test_delete_controls_only_visible_to_owner(self):
+        marker = 'popovertarget="delete-skill-' + str(self.skill.pk) + '"'
+        for page in ("main:show_main", "main:show_skill"):
+            self.client.logout()
+            self.assertNotContains(self.client.get(reverse(page)), marker)
+            self.client.force_login(self.visitor)
+            self.assertNotContains(self.client.get(reverse(page)), marker)
+            self.client.force_login(self.owner)
+            response = self.client.get(reverse(page))
+            self.assertContains(response, marker)
+            self.assertContains(response, 'action="' + self.url + '"')
+
+    def test_delete_requires_csrf_token(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.owner)
+        client.get(reverse("main:show_main"))
+        self.assertEqual(client.post(self.url).status_code, 403)
+        self.assertTrue(Skill.objects.filter(pk=self.skill.pk).exists())
+        response = client.post(self.url, {"csrfmiddlewaretoken": client.cookies["csrftoken"].value})
+        self.assertEqual(response.status_code, 302)
+        self.assertFalse(Skill.objects.filter(pk=self.skill.pk).exists())
 
 class MainTest(TestCase):
     def setUp(self):
