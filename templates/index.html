@@ -24,7 +24,6 @@
                 <div class="meta-list glass-card">
                     <p>{{ npm }}<br>
                     PBP-F</p>
-                    <p>Sesi Terakhir Login<br>{{ last_login }}</p>
                 </div>
             </div>
             <div class="hero-details">
@@ -34,4 +33,7 @@
         </div>
     </section>
     {% include 'skills.html' %}
+    <div class="container">
+        <p class="last-login">Sesi Terakhir Login<br>{{ last_login }}</p>
+    </div>
 {% endblock %}

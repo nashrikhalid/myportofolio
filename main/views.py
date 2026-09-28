@@ -52,27 +52,6 @@ def register(request):
     }
     return render(request, "register.html", context)
 
-def is_authorized(request):
-    secret = getattr(settings, 'PORTFOLIO_SECRET', os.getenv('PORTFOLIO_SECRET', 'rahasia123'))
-
-    # 1. Cek custom header pada request (misal: X-Secret-Key)
-    header_secret = (
-        request.headers.get("X-Secret-Key")
-        or request.headers.get("X-Portfolio-Secret")
-        or request.headers.get("X-Admin-Secret")
-        or request.headers.get("Secret-Key")
-        or request.META.get("HTTP_X_SECRET_KEY")
-    )
-    if header_secret and header_secret == secret:
-        return True
-
-    # 2. Cek field password pada form (POST)
-    post_password = request.POST.get("password")
-    if post_password and post_password == secret:
-        return True
-
-    return False
-
 
 def show_main(request):
     context = {
@@ -90,6 +69,7 @@ def show_main(request):
         ),
         "skill_list": Skill.objects.all(),
         "last_login": request.COOKIES.get("last_login", "Belum ada sesi login / Cookie tidak ditemukan"),
+        "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
     return render(request, "index.html", context)
 
@@ -232,7 +212,7 @@ def toggle_experience_star(request, experience_id):
 
 
 
-
+@login_required(login_url="main:login")
 def create_experience(request):
     form = ExperienceForm(request.POST or None)
     if not request.user.is_superuser:
@@ -240,10 +220,7 @@ def create_experience(request):
     form = ExperienceForm(request.POST or None)
 
     if request.method == "POST":
-        if not is_authorized(request):
-            form.add_error("password", "Kode rahasia atau password salah!")
-            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
-        elif form.is_valid():
+        if form.is_valid():
             form.save()
             messages.success(request, "Pengalaman baru berhasil ditambahkan!")
             return redirect("main:show_experience")
@@ -254,6 +231,7 @@ def create_experience(request):
     }
     return render(request, "experiences_form.html", context)
 
+@login_required(login_url="main:login")
 def update_experience(request, experience_id):
     is_editor = request.user.groups.filter(name="Editor").exists()
     if not (request.user.is_superuser or is_editor):
@@ -262,10 +240,7 @@ def update_experience(request, experience_id):
     form = ExperienceForm(request.POST or None, instance=experience)
 
     if request.method == "POST":
-        if not is_authorized(request):
-            form.add_error("password", "Kode rahasia atau password salah!")
-            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
-        elif form.is_valid():
+        if form.is_valid():
             form.save()
             messages.success(request, "Pengalaman berhasil diperbarui!")
             return redirect("main:show_experience")
@@ -284,26 +259,23 @@ def get_experiences_json(request):
     if title_query:
         experiences = experiences.filter(title__icontains=title_query)
 
-    experiences_json = serializers.serialize("json", experiences)
+    experiences_json = serializers.serialize("json", experiences, use_natural_foreign_keys=True)
     return HttpResponse(experiences_json, content_type="application/json")
 
+@login_required(login_url="main:login")
 def delete_experience(request, experience_id):
     experience = get_object_or_404(Experience, pk=experience_id)
     if not request.user.is_superuser:
         raise PermissionDenied
-    project = get_object_or_404(Experience, pk=experience_id)
 
     if request.method == "POST":
-        if not is_authorized(request):
-            messages.error(request, "Akses ditolak: Kode rahasia atau password salah!")
-            return redirect("main:show_experience")
-
         experience.delete()
         messages.success(request, "Pengalaman berhasil dihapus!")
         return redirect("main:show_experience")
 
     return redirect("main:show_experience")
 
+@login_required(login_url="main:login")
 def create_skill(request):
     form = SkillForm(request.POST or None)
     if not request.user.is_superuser:
@@ -311,10 +283,7 @@ def create_skill(request):
     form = SkillForm(request.POST or None)
 
     if request.method == "POST":
-        if not is_authorized(request):
-            form.add_error("password", "Kode rahasia atau password salah!")
-            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
-        elif form.is_valid():
+        if form.is_valid():
             form.save()
             messages.success(request, "Skill baru berhasil ditambahkan!")
             return redirect("main:show_skill")
@@ -325,6 +294,7 @@ def create_skill(request):
     }
     return render(request, "skills_form.html", context)
 
+@login_required(login_url="main:login")
 def update_skill(request, skill_id):
     is_editor = request.user.groups.filter(name="Editor").exists()
     if not (request.user.is_superuser or is_editor):
@@ -333,10 +303,7 @@ def update_skill(request, skill_id):
     form = SkillForm(request.POST or None, instance=skill)
 
     if request.method == "POST":
-        if not is_authorized(request):
-            form.add_error("password", "Kode rahasia atau password salah!")
-            messages.error(request, "Akses ditolak: Password atau header rahasia salah!")
-        elif form.is_valid():
+        if form.is_valid():
             form.save()
             messages.success(request, "Skill berhasil diperbarui!")
             return redirect("main:show_skill")

@@ -18,7 +18,7 @@
                         <div class="skill glass-card" aria-label="{{ skill.name }}" title="{{ skill.name }}">
                             <span class="{{ skill.logo }}"></span>
                         </div>
-                        {% if user.is_superuser or user.is_editor %}
+                        {% if user.is_superuser or is_editor %}
                             <a href="{% url 'main:update_skill' skill.id %}"
                                class="button"
                                aria-label="Edit {{ skill.name }}">Edit</a>

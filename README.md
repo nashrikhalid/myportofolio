@@ -46,6 +46,10 @@ Di tutorial 3, show_projects juga memanggil get_projects_json, lalu hasilnya di-
 
 Link AI Gemini: https://share.gemini.google/TEAkHw9YbMLZ
 
+
+## Tugas 4
+AI Disclosure: Dalam mengerjakan tugas 4, saya memakai AI untuk memahami alur autentikasi dan cookie, serta meminta penjelasan lebih rinci mengenai tutorial 4 dan contoh penerapannya di tugas 4.
+
 ## Tutorial 4 Opsional
 
 Skrip pengujian browser dan eksperimen intersepsi CSRF tersedia dalam [panduan Selenium dan Burp Suite](docs/tutorial4-optional.md). Jalankan dengan virtual environment aktif: python test_e2e.py --headless atau python test_e2e.py --burp.

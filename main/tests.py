@@ -3,7 +3,7 @@ from django.urls import reverse
 from django.utils import timezone
 from main.models import Experience
 from main.models import Project
-from django.contrib.auth.models import User
+from django.contrib.auth.models import Group, User
 from django.test import Client
 from main.models import Skill
 
@@ -54,6 +54,147 @@ class SkillDeleteTest(TestCase):
         response = client.post(self.url, {"csrfmiddlewaretoken": client.cookies["csrftoken"].value})
         self.assertEqual(response.status_code, 302)
         self.assertFalse(Skill.objects.filter(pk=self.skill.pk).exists())
+
+class AssignmentFourTest(TestCase):
+    """Kontrak Tugas 4; akun dan objek hanya hidup di database pengujian."""
+
+    @classmethod
+    def setUpTestData(cls):
+        cls.member = User.objects.create_user("assignment_member", email="private@example.com")
+        cls.editor = User.objects.create_user("assignment_editor")
+        cls.owner = User.objects.create_user("assignment_owner", is_superuser=True)
+        cls.editor.groups.add(Group.objects.create(name="Editor"))
+        cls.project = Project.objects.create(title="Original project", description="Original")
+        cls.experience = Experience.objects.create(title="Original experience", org="UI", description="Original")
+        cls.skill = Skill.objects.create(name="Original skill", logo="fa-python")
+
+    def resources(self):
+        return [
+            ("project", self.project, {"title": "Changed project", "description": "Updated"}),
+            ("experience", self.experience, {"title": "Changed experience", "org": "UI", "description": "Updated", "category": "research", "started_at": "2026-09-01", "ended_at": ""}),
+            ("skill", self.skill, {"name": "Changed skill", "logo": "fa-python"}),
+        ]
+
+    def test_anonymous_mutations_redirect_to_login(self):
+        for name, obj, data in self.resources():
+            for action in ("create", "update", "delete"):
+                url = reverse(f"main:{action}_{name}", args=[] if action == "create" else [obj.pk])
+                for method in (self.client.get, self.client.post):
+                    with self.subTest(resource=name, action=action, method=method.__name__):
+                        response = method(url) if method.__name__ == "get" else method(url, data)
+                        self.assertRedirects(response, reverse("main:login") + "?next=" + url, fetch_redirect_response=False)
+        url = reverse("main:toggle_experience_star", args=[self.experience.pk])
+        self.assertRedirects(self.client.post(url), reverse("main:login") + "?next=" + url, fetch_redirect_response=False)
+        self.assertEqual(self.experience.starred_by.count(), 0)
+
+    def test_member_cannot_write_and_editor_cannot_create_or_delete(self):
+        for user, actions in [(self.member, ("create", "update", "delete")), (self.editor, ("create", "delete"))]:
+            self.client.force_login(user)
+            for name, obj, data in self.resources():
+                original = type(obj).objects.values().get(pk=obj.pk)
+                for action in actions:
+                    url = reverse(f"main:{action}_{name}", args=[] if action == "create" else [obj.pk])
+                    for method in (self.client.get, self.client.post):
+                        with self.subTest(role=user.username, resource=name, action=action, method=method.__name__):
+                            self.assertEqual(method(url, data).status_code, 403)
+                            self.assertEqual(type(obj).objects.count(), 1)
+                            self.assertEqual(type(obj).objects.values().get(pk=obj.pk), original)
+
+    def test_editor_and_owner_can_save_edits_without_secret(self):
+        for user in (self.editor, self.owner):
+            self.client.force_login(user)
+            for name, obj, data in self.resources():
+                with self.subTest(role=user.username, resource=name):
+                    url = reverse(f"main:update_{name}", args=[obj.pk])
+                    self.assertEqual(self.client.get(url).status_code, 200)
+                    self.assertEqual(self.client.post(url, data).status_code, 302)
+                    obj.refresh_from_db()
+                    field = "name" if name == "skill" else "title"
+                    self.assertEqual(getattr(obj, field), data[field])
+
+    def test_owner_can_create_and_delete_without_secret(self):
+        self.client.force_login(self.owner)
+        for name, obj, data in self.resources():
+            with self.subTest(resource=name):
+                response = self.client.post(reverse(f"main:create_{name}"), data)
+                self.assertEqual(response.status_code, 302)
+                created = type(obj).objects.exclude(pk=obj.pk).get()
+                url = reverse(f"main:delete_{name}", args=[created.pk])
+                self.client.get(url)
+                self.assertTrue(type(obj).objects.filter(pk=created.pk).exists())
+                self.assertEqual(self.client.post(url).status_code, 302)
+                self.assertFalse(type(obj).objects.filter(pk=created.pk).exists())
+
+    def test_controls_match_roles_on_all_pages(self):
+        pages = [("show_project", "project", self.project), ("show_experience", "experience", self.experience), ("show_skill", "skill", self.skill), ("show_main", "skill", self.skill)]
+        for user in (None, self.member, self.editor, self.owner):
+            self.client.logout()
+            if user:
+                self.client.force_login(user)
+            for page, name, obj in pages:
+                with self.subTest(role=user.username if user else "anonymous", page=page):
+                    response = self.client.get(reverse("main:" + page))
+                    self.assertEqual(response.status_code, 200)
+                    edit = reverse(f"main:update_{name}", args=[obj.pk])
+                    (self.assertContains if user in (self.editor, self.owner) else self.assertNotContains)(response, edit)
+                    for url in [reverse(f"main:create_{name}"), reverse(f"main:delete_{name}", args=[obj.pk])]:
+                        (self.assertContains if user == self.owner else self.assertNotContains)(response, url)
+
+    def test_experience_star_is_per_account_post_only_and_visible(self):
+        url = reverse("main:toggle_experience_star", args=[self.experience.pk])
+        for user in (self.member, self.editor, self.owner):
+            self.client.force_login(user)
+            before = self.experience.starred_by.count()
+            self.client.get(url)
+            self.assertEqual(self.experience.starred_by.count(), before)
+            self.assertRedirects(self.client.post(url), reverse("main:show_experience"))
+            self.assertEqual(self.experience.starred_by.count(), before + 1)
+            response = self.client.get(reverse("main:show_experience"))
+            self.assertContains(response, "Unstar")
+            self.assertContains(response, f'class="star-count">{before + 1}')
+        self.experience.starred_by.add(self.member)
+        self.assertEqual(self.experience.starred_by.count(), 3)
+        self.client.force_login(self.member)
+        self.client.post(url)
+        self.assertEqual(self.experience.starred_by.count(), 2)
+        self.assertFalse(self.experience.starred_by.filter(pk=self.member.pk).exists())
+
+    def test_experience_star_requires_csrf(self):
+        client = Client(enforce_csrf_checks=True)
+        client.force_login(self.member)
+        client.get(reverse("main:show_experience"))
+        url = reverse("main:toggle_experience_star", args=[self.experience.pk])
+        self.assertEqual(client.post(url).status_code, 403)
+        self.assertEqual(self.experience.starred_by.count(), 0)
+        token = client.cookies["csrftoken"].value
+        self.assertEqual(client.post(url, {"csrfmiddlewaretoken": token}).status_code, 302)
+        self.assertEqual(self.experience.starred_by.count(), 1)
+
+    def test_public_json_fields_and_search(self):
+        expected = {
+            "projects": {"title", "description", "tech_stack", "project_url", "project_image_url", "starred_by"},
+            "experiences": {"title", "org", "description", "category", "started_at", "ended_at", "starred_by"},
+            "skills": {"name", "logo"},
+        }
+        for name, fields in expected.items():
+            with self.subTest(endpoint=name):
+                url = reverse(f"main:get_{name}_json")
+                response = self.client.get(url)
+                self.assertEqual(response.status_code, 200)
+                self.assertEqual(response["Content-Type"], "application/json")
+                self.assertEqual(set(response.json()[0]["fields"]), fields)
+                self.assertNotContains(response, self.member.email)
+                key = "name" if name == "skills" else "title"
+                self.assertEqual(len(self.client.get(url, {key: "Original"}).json()), 1)
+                self.assertEqual(self.client.get(url, {key: "absent"}).json(), [])
+
+    def test_star_json_uses_usernames_as_in_tutorial(self):
+        for obj, endpoint in [(self.project, "get_projects_json"), (self.experience, "get_experiences_json")]:
+            with self.subTest(endpoint=endpoint):
+                obj.starred_by.add(self.member)
+                data = self.client.get(reverse("main:" + endpoint)).json()
+                self.assertEqual(data[0]["fields"]["starred_by"], [[self.member.username]])
+
 
 class MainTest(TestCase):
     def setUp(self):
@@ -106,10 +247,10 @@ class TutorialFourTest(TestCase):
         self.assertContains(response, "Star")
         self.assertNotContains(response, "Tambah Proyek")
         self.assertNotContains(response, "Hapus Proyek")
-        self.assertNotContains(response, "Edit Proyek")
+        self.assertNotContains(response, reverse("main:update_project", args=[self.project.pk]))
         self.client.force_login(self.owner)
         response = self.client.get(reverse("main:show_project"))
-        for text in ["Tambah Proyek", "Hapus Proyek", "Edit Proyek"]:
+        for text in ["Tambah Proyek", "Hapus Proyek", reverse("main:update_project", args=[self.project.pk])]:
             self.assertContains(response, text)
 
     def test_register_validation_and_password_hash(self):
@@ -180,7 +321,7 @@ class TutorialFourTest(TestCase):
         self.assertFalse(Project.objects.filter(pk=project.pk).exists())
 
     def test_stars_are_per_user_post_only_and_visible_in_api(self):
-        url = reverse("main:toggle_star", args=[self.project.pk])
+        url = reverse("main:toggle_project_star", args=[self.project.pk])
         self.assertEqual(self.client.post(url).status_code, 302)
         self.assertEqual(self.project.starred_by.count(), 0)
         self.client.force_login(self.user)
@@ -207,7 +348,7 @@ class TutorialFourTest(TestCase):
         self.assertContains(self.client.get(reverse("main:show_project"), {"title": "Tutorial"}), self.project.title)
         self.assertNotContains(self.client.get(reverse("main:show_project"), {"title": "absent"}), self.project.title)
         self.client.force_login(self.user)
-        self.assertEqual(self.client.post(reverse("main:toggle_star", args=["00000000-0000-0000-0000-000000000000"])).status_code, 404)
+        self.assertEqual(self.client.post(reverse("main:toggle_project_star", args=["00000000-0000-0000-0000-000000000000"])).status_code, 404)
 
     def test_csrf_rejects_missing_token_and_accepts_form_or_header(self):
         client = Client(enforce_csrf_checks=True)
@@ -221,7 +362,7 @@ class TutorialFourTest(TestCase):
         response = client.post(create_url, {"title": "CSRF allowed", "description": "Valid", "csrfmiddlewaretoken": token})
         self.assertEqual(response.status_code, 302)
         self.assertTrue(Project.objects.filter(title="CSRF allowed").exists())
-        star_url = reverse("main:toggle_star", args=[self.project.pk])
+        star_url = reverse("main:toggle_project_star", args=[self.project.pk])
         self.assertEqual(client.post(star_url).status_code, 403)
         self.assertEqual(client.post(star_url, HTTP_X_CSRFTOKEN="invalid").status_code, 403)
         self.assertEqual(client.post(star_url, HTTP_X_CSRFTOKEN=token).status_code, 302)
