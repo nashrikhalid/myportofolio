@@ -75,25 +75,18 @@ def show_main(request):
     return render(request, "index.html", context)
 
 
-def show_experience(request):
-    json_response = get_experiences_json(request)
-
-    experiences = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    experiences = [exp.object for exp in experiences]
+def show_experiences(request):
     title_query = request.GET.get("title", "").strip()
 
     context = {
         "name": "Nashri",
-        "experience_list": experiences,
         "title_query": title_query,
+        "form": ExperienceForm(),
         "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
     return render(request, "experiences.html", context)
 
-def show_project(request):
+def show_projects(request):
     title_query = request.GET.get("title", "").strip()
     projects = Project.objects.prefetch_related("starred_by").all()
     if title_query:
@@ -107,7 +100,7 @@ def show_project(request):
     }
     return render(request, "projects.html", context)
 
-def show_skill(request):
+def show_skills(request):
     json_response = get_skills_json(request)
     skills = serializers.deserialize(
         "json",
@@ -134,13 +127,13 @@ def create_project(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Proyek baru berhasil ditambahkan!")
-            return redirect("main:show_project")
+            return redirect("main:show_projects")
 
     context = {
         "name": "Nashri",
         "form": form,
     }
-    return render(request, "projects_form.html", context)
+    return render(request, "project_form.html", context)
 
 def get_projects_json(request):
     title_query = request.GET.get("title", "").strip()
@@ -181,9 +174,9 @@ def delete_project(request, project_id):
     if request.method == "POST":
         project.delete()
         messages.success(request, "Project berhasil dihapus!")
-        return redirect("main:show_project")
+        return redirect("main:show_projects")
 
-    return redirect("main:show_project")
+    return redirect("main:show_projects")
 
 @login_required(login_url="main:login")
 def update_project(request, project_id):
@@ -197,14 +190,14 @@ def update_project(request, project_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Proyek berhasil diperbarui!")
-            return redirect("main:show_project")
+            return redirect("main:show_projects")
 
     context = {
         "name": "Nashri",
         "form": form,
         "project": project,
     }
-    return render(request, "projects_form.html", context)
+    return render(request, "project_form.html", context)
 
 @require_POST
 def create_project_ajax(request):
@@ -224,6 +217,31 @@ def create_project_ajax(request):
 
     return JsonResponse({"errors": form.errors.get_json_data()}, status=400)
 
+@require_POST
+def create_experience_ajax(request):
+    if not request.user.is_superuser:
+        return JsonResponse(
+            {"message": "Hanya pemilik portofolio yang dapat menambahkan pengalaman."},
+            status=403,
+        )
+
+    form = ExperienceForm(request.POST)
+
+    if form.is_valid():
+        experience = form.save()
+        return JsonResponse(
+            {
+                "message": "Pengalaman berhasil ditambahkan.",
+                "pk": str(experience.id),
+            },
+            status=201,
+        )
+
+    return JsonResponse(
+        {"errors": form.errors.get_json_data()},
+        status=400,
+    )
+
 def toggle_star_for_user(obj, user):
     if obj.starred_by.filter(pk=user.pk).exists():
         obj.starred_by.remove(user)
@@ -237,7 +255,7 @@ def toggle_project_star(request, project_id):
     if request.method == "POST":
         toggle_star_for_user(project, request.user)
 
-    return redirect("main:show_project")
+    return redirect("main:show_projects")
 
 
 @login_required(login_url="main:login")
@@ -247,7 +265,7 @@ def toggle_experience_star(request, experience_id):
     if request.method == "POST":
         toggle_star_for_user(experience, request.user)
 
-    return redirect("main:show_experience")
+    return redirect("main:show_experiences")
 
 
 
@@ -262,13 +280,13 @@ def create_experience(request):
         if form.is_valid():
             form.save()
             messages.success(request, "Pengalaman baru berhasil ditambahkan!")
-            return redirect("main:show_experience")
+            return redirect("main:show_experiences")
 
     context = {
         "name": "Nashri",
         "form": form,
     }
-    return render(request, "experiences_form.html", context)
+    return render(request, "experience_form.html", context)
 
 @login_required(login_url="main:login")
 def update_experience(request, experience_id):
@@ -282,24 +300,46 @@ def update_experience(request, experience_id):
         if form.is_valid():
             form.save()
             messages.success(request, "Pengalaman berhasil diperbarui!")
-            return redirect("main:show_experience")
+            return redirect("main:show_experiences")
 
     context = {
         "name": "Nashri",
         "form": form,
         "experience": experience,
     }
-    return render(request, "experiences_form.html", context)
+    return render(request, "experience_form.html", context)
 
 def get_experiences_json(request):
     title_query = request.GET.get("title", "").strip()
-    experiences = Experience.objects.all()
+    experiences = Experience.objects.prefetch_related('starred_by').all()
 
     if title_query:
         experiences = experiences.filter(title__icontains=title_query)
 
-    experiences_json = serializers.serialize("json", experiences, use_natural_foreign_keys=True)
-    return HttpResponse(experiences_json, content_type="application/json")
+    # Konstruksi data JSON secara manual agar bisa menyisipkan logika Star
+    data = []
+    for experience in experiences:
+        starred_users = experience.starred_by.all()
+        is_starred = request.user in starred_users if request.user.is_authenticated else False
+        starred_by_names = ", ".join([u.username for u in starred_users])
+
+        data.append({
+            "pk": str(experience.id),
+            "fields": {
+                "title": experience.title,
+                "description": experience.description,
+                "org": experience.org,
+                "category_display": experience.get_category_display(),
+                "started_at": experience.started_at,
+                "ended_at": experience.ended_at,
+                "is_ongoing": experience.is_ongoing,
+                "star_count": starred_users.count(),
+                "is_starred": is_starred,
+                "starred_by_names": starred_by_names,
+            }
+        })
+
+    return JsonResponse(data, safe=False)
 
 @login_required(login_url="main:login")
 def delete_experience(request, experience_id):
@@ -310,9 +350,9 @@ def delete_experience(request, experience_id):
     if request.method == "POST":
         experience.delete()
         messages.success(request, "Pengalaman berhasil dihapus!")
-        return redirect("main:show_experience")
+        return redirect("main:show_experiences")
 
-    return redirect("main:show_experience")
+    return redirect("main:show_experiences")
 
 @login_required(login_url="main:login")
 def create_skill(request):
@@ -331,7 +371,7 @@ def create_skill(request):
         "name": "Nashri",
         "form": form,
     }
-    return render(request, "skills_form.html", context)
+    return render(request, "skill_form.html", context)
 
 @login_required(login_url="main:login")
 def update_skill(request, skill_id):
@@ -352,7 +392,7 @@ def update_skill(request, skill_id):
         "form": form,
         "skill": skill,
     }
-    return render(request, "skills_form.html", context)
+    return render(request, "skill_form.html", context)
 
 def get_skills_json(request):
     name_query = request.GET.get("name", "").strip()

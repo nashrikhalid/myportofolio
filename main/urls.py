@@ -7,9 +7,9 @@ from main.views import (
     toggle_project_star,
     toggle_experience_star,
     show_main,
-    show_experience,
-    show_project,
-    show_skill,
+    show_experiences,
+    show_projects,
+    show_skills,
     create_project,
     update_project,
     delete_project,
@@ -23,15 +23,16 @@ from main.views import (
     delete_skill,
     get_skills_json,
     create_project_ajax,
+    create_experience_ajax,
 )
 
 app_name = "main"
 
 urlpatterns = [
     path("", show_main, name="show_main"),
-    path("experience/", show_experience, name="show_experience"),
-    path("projects/", show_project, name="show_project"),
-    path("skill/", show_skill, name="show_skill"),
+    path("experiences/", show_experiences, name="show_experiences"),
+    path("projects/", show_projects, name="show_projects"),
+    path("skills/", show_skills, name="show_skills"),
     # Projects
     path("projects/add/", create_project, name="create_project"),
     path("projects/<uuid:project_id>/star/", toggle_project_star, name="toggle_project_star"),
@@ -40,15 +41,16 @@ urlpatterns = [
     path("api/projects/", get_projects_json, name="get_projects_json"),
     path("projects/add-ajax/", create_project_ajax, name="create_project_ajax"),
     # Experiences
-    path("experience/add/", create_experience, name="create_experience"),
-    path("experience/<uuid:experience_id>/star/", toggle_experience_star, name="toggle_experience_star"),
-    path("experience/<uuid:experience_id>/edit/", update_experience, name="update_experience"),
-    path("experience/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
+    path("experiences/add/", create_experience, name="create_experience"),
+    path("experiences/<uuid:experience_id>/star/", toggle_experience_star, name="toggle_experience_star"),
+    path("experiences/<uuid:experience_id>/edit/", update_experience, name="update_experience"),
+    path("experiences/<uuid:experience_id>/delete/", delete_experience, name="delete_experience"),
     path("api/experiences/", get_experiences_json, name="get_experiences_json"),
+    path("experiences/add-ajax/", create_experience_ajax, name="create_experience_ajax"),
     # Skills
-    path("skill/add/", create_skill, name="create_skill"),
-    path("skill/<uuid:skill_id>/edit/", update_skill, name="update_skill"),
-    path("skill/<uuid:skill_id>/delete/", delete_skill, name="delete_skill"),
+    path("skills/add/", create_skill, name="create_skill"),
+    path("skills/<uuid:skill_id>/edit/", update_skill, name="update_skill"),
+    path("skills/<uuid:skill_id>/delete/", delete_skill, name="delete_skill"),
     path("api/skills/", get_skills_json, name="get_skills_json"),
 
     path("login/", login_user, name="login"),

@@ -74,7 +74,7 @@ def main():
             self.assertIn("Sesi Terakhir Login", driver.page_source)
             driver.save_screenshot(str(evidence / "01-login.png"))
             print("[PASS] Login, sessionid, last_login, dan navbar", flush=True)
-            driver.get(base + "/experience/")
+            driver.get(base + "/experiences/")
             self.assertEqual(driver.find_element(By.CLASS_NAME, "nav-user").text, "visitor_e2e")
             driver.get(base + "/projects/add/")
             self.assertIn("Forbidden", driver.page_source)
