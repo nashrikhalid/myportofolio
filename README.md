@@ -54,3 +54,50 @@ AI Disclosure: Dalam mengerjakan tugas 4, saya memakai AI untuk memahami alur au
 
 Skrip pengujian browser dan eksperimen intersepsi CSRF tersedia dalam [panduan Selenium dan Burp Suite](docs/tutorial4-optional.md). Jalankan dengan virtual environment aktif: python test_e2e.py --headless atau python test_e2e.py --burp.
 
+### Tugas 5
+
+1. Jelaskan apa itu debouncing dan mengapa teknik ini penting diterapkan pada fitur pencarian yang menggunakan AJAX!
+
+   Jawab: Debouncing adalah teknik menunda pemanggilan fungsi sampai tidak ada event baru selama jeda waktu tertentu. Pada pencarian, timer diulang setiap kali pengguna mengetik, sehingga permintaan AJAX baru dikirim setelah pengguna berhenti mengetik selama jeda tersebut, misalnya 300 milidetik. Teknik ini mengurangi jumlah permintaan ke server, menghemat penggunaan jaringan, dan menghindari pembaruan hasil untuk setiap karakter yang diketik. Pada halaman Experiences saya, debouncing diterapkan dengan clearTimeout dan setTimeout.
+
+2. Jelaskan fungsi dari penggunaan await ketika kita menggunakan fetch()! Apa yang akan terjadi jika kita tidak menggunakan await?
+
+   Jawab: await menunda kelanjutan fungsi async sampai Promise yang ditunggu selesai. Pada await fetch(url), kode menunggu respons sebelum memakai objek Response. Setelah itu, await response.json() menunggu pembacaan dan pengubahan isi respons JSON menjadi data JavaScript. Penantian ini tidak menghentikan seluruh browser. Tanpa await, fetch() mengembalikan Promise, sehingga kode berikutnya bisa berjalan sebelum respons tersedia. Jika Promise tersebut langsung diperlakukan sebagai Response, misalnya dengan memanggil .json(), akan terjadi error. Alternatifnya, hasil dapat ditangani dengan .then(). Dalam skrip biasa seperti pada proyek ini, await digunakan di dalam fungsi async; JavaScript juga mendukung await pada tingkat teratas sebuah modul.
+
+   Promise adalah objek yang merepresentasikan hasil atau kegagalan suatu operasi asinkron yang mungkin belum selesai.
+
+3. Jelaskan apa itu serangan XSS (Cross-Site Scripting) dan mengapa data yang ditampilkan melalui AJAX/JavaScript lebih rentan terhadap serangan ini daripada data yang ditampilkan langsung melalui template Django!
+
+   Jawab: Cross-Site Scripting (XSS) adalah serangan ketika penyerang menyisipkan kode berbahaya ke halaman web sehingga dijalankan oleh browser pengguna lain dalam konteks situs tersebut. Contohnya adalah memasukkan tag gambar dengan atribut onerror berisi JavaScript ke kolom judul. Jika input itu dimasukkan langsung ke innerHTML, browser dapat menafsirkannya sebagai HTML dan menjalankan kode tersebut.
+   Template Django secara default melakukan auto-escaping terhadap variabel yang ditampilkan, sehingga karakter khusus seperti < dan > ditampilkan sebagai teks. Ketika data JSON dirakit menjadi HTML oleh JavaScript, perlindungan template Django itu tidak otomatis berlaku pada data tersebut. Karena itu, memasukkan data mentah ke innerHTML dapat membuka celah XSS. AJAX sendiri tidak otomatis tidak aman; risikonya bergantung pada cara data ditampilkan.
+   Pada proyek saya, teks dari JSON di-escape menggunakan escapeHtml sebelum disisipkan ke HTML. Alternatifnya adalah memakai textContent agar input diperlakukan sebagai teks. Input teks juga perlu dibersihkan di server menggunakan strip_tags dalam method clean_<field> pada ModelForm. Pembersihan input ini merupakan lapisan tambahan dan tidak menggantikan escaping saat menampilkan data.
+
+
+#### Implementasi Tugas 5
+
+Halaman `/experiences/` memuat data JSON beserta informasi star melalui Fetch API, menyediakan pencarian dengan debounce 300 ms, dan menampilkan kondisi loading, kosong, serta error. Superuser dapat menambahkan pengalaman melalui modal tanpa reload, dengan toast sukses atau pesan validasi. Endpoint memeriksa hak akses dan CSRF, sedangkan ExperienceForm membersihkan judul, organisasi, dan deskripsi. Teks JSON di-escape saat kartu ditampilkan. Editor tetap dapat mengedit, dan pengunjung dapat membaca daftar.
+
+#### Menjalankan proyek secara lokal (Windows PowerShell)
+
+Jalankan perintah berikut dari folder proyek. Jika folder `env` sudah tersedia, langkah pembuatan virtual environment dapat dilewati.
+
+```powershell
+python -m venv env
+.\env\Scripts\python.exe -m pip install -r requirements.txt
+$env:PRODUCTION = "False"
+.\env\Scripts\python.exe manage.py migrate
+.\env\Scripts\python.exe manage.py createsuperuser
+.\env\Scripts\python.exe manage.py runserver
+```
+
+Pembuatan superuser cukup sekali; gunakan akun yang sudah ada jika tersedia. Mode lokal memakai SQLite dan tidak membutuhkan konfigurasi PostgreSQL produksi. Buka `http://127.0.0.1:8000/experiences/`, lalu login melalui `/login/` untuk menguji peran superuser. Untuk menguji Editor, buat grup bernama `Editor` melalui Django admin dan masukkan akun penguji ke grup tersebut. Akun biasa dapat dibuat melalui `/register/`.
+
+Uji pencarian, hasil kosong, tambah data valid, input tidak valid, notifikasi, dan akses tanpa login. Pemeriksaan konfigurasi dapat dijalankan dengan `python manage.py check` jika virtual environment sudah aktif. Tes lama di `main/tests.py` masih memiliki ekspektasi HTML/JSON sebelum AJAX; hasilnya belum seluruhnya lulus dan perlu disesuaikan dengan alur baru.
+
+#### AI Disclosure Tugas 5
+
+Saya menggunakan OpenAI Codex melalui percakapan untuk memahami instruksi Tugas 5 dan menghubungkannya dengan Tutorial 5. Strategi prompting dilakukan bertahap: meminta penjelasan intuitif tentang AJAX, XSS, debouncing, dan serialization; menanyakan penyesuaian potongan kode Projects menjadi Experiences; meminta penjelasan skrip per bagian; kemudian meminta audit terhadap checklist tugas.
+
+Codex membantu menulis skrip AJAX Experiences dan menyesuaikan field endpoint JSON, mempertahankan desain kartu, membetulkan penamaan tunggal/jamak beserta referensinya, serta memeriksa hak akses dan validasi. Codex juga membantu memperbaiki pembersihan field organisasi, menghapus fungsi escapeHtml yang duplikat, dan merapikan jawaban reflektif serta dokumentasi ini. Jadi bantuan AI mencakup penjelasan, penulisan/perubahan kode, pemeriksaan, dan penyusunan dokumentasi.
+
+Proses ini menunjukkan bahwa contoh kode tidak dapat langsung disalin tanpa disesuaikan: field Projects berbeda dari Experience, nama class CSS harus cocok dengan desain, dan method clean_<field> harus sesuai nama field serta berada di dalam kelas form, bukan Meta. Pemeriksaan kode dan endpoint oleh AI juga belum membuktikan seluruh interaksi browser berjalan benar. Pengujian manual antarmuka dan pemeriksaan hasil akhir tetap diperlukan. Ringkasan ini merupakan catatan penggunaan AI, bukan transkrip lengkap percakapan.
