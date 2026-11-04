@@ -53,9 +53,10 @@
         {% include "components/experience_form_modal.html" %}
     {% endif %}
 
+    {% csrf_token %}
     <script>
     // Alamat JSON dan hak akses disediakan Django sebelum halaman dikirim.
-    const BASE_EXPERIENCES_ENDPOINT = "{% url 'main:get_experiences_json' %}";
+    const BASE_EXPERIENCES_ENDPOINT = "{% url 'api:experience-list' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
     const CAN_EDIT = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
     let experiencesAbortController;
@@ -98,17 +99,17 @@
 
     // Ubah satu objek JSON menjadi satu kartu dengan desain Experiences lama.
     function buildExperienceCardElement(item) {
-        const experience = item.fields;
-        const experienceId = item.pk;
+        const experience = item;
+        const experienceId = item.id;
         const articleElement = document.createElement('article');
         articleElement.className = 'experience-block glass-card';
 
         // Ganti UUID contoh dengan ID pengalaman yang sedang dibuat kartunya.
-        const starUrl = "{% url 'main:toggle_experience_star' '00000000-0000-0000-0000-000000000000' %}"
+        const starUrl = "{% url 'api:experience-star' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', experienceId);
         const editUrl = "{% url 'main:update_experience' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', experienceId);
-        const deleteUrl = "{% url 'main:delete_experience' '00000000-0000-0000-0000-000000000000' %}"
+        const deleteUrl = "{% url 'api:experience-detail' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', experienceId);
 
         const editHtml = CAN_EDIT ? `<a href="${editUrl}" class="button">Edit</a>` : '';
@@ -140,7 +141,7 @@
             <h4>${escapeHtml(experience.org)}</h4>
             <ul>${descriptionHtml}</ul>
             <div class="project-actions" style="margin-top: 1rem;">
-                <form method="post" action="${starUrl}" class="star-form">
+                {% if user.is_authenticated %}<form method="post" action="${starUrl}" class="star-form">
                     {% csrf_token %}
                     <button type="submit" class="button button-star${experience.is_starred ? ' is-starred' : ''}"
                             aria-pressed="${experience.is_starred ? 'true' : 'false'}"
@@ -149,7 +150,7 @@
                         ${experience.is_starred ? 'Unstar' : 'Star'}
                         <span class="star-count">${escapeHtml(experience.star_count)}</span>
                     </button>
-                </form>
+                </form>{% else %}<a href="{% url 'main:login' %}" class="button">Login untuk Star</a>{% endif %}
                 ${editHtml}
                 ${deleteHtml}
             </div>`;
@@ -209,7 +210,7 @@
         document.getElementById("add-experience-modal").hidePopover();
     }
 
-    const CREATE_EXPERIENCE_ENDPOINT = "{% url 'main:create_experience_ajax' %}";
+    const CREATE_EXPERIENCE_ENDPOINT = "{% url 'api:experience-list' %}";
     const experienceForm = document.getElementById('experience-form');
 
     // Membaca nilai cookie, digunakan untuk mengambil token CSRF
@@ -238,8 +239,8 @@
         try {
             const response = await fetch(CREATE_EXPERIENCE_ENDPOINT, {
                 method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                body: new FormData(experienceForm),
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify(Object.fromEntries([...new FormData(experienceForm)].filter(([key]) => key !== "csrfmiddlewaretoken").map(([key,value]) => [key, key === "ended_at" && !value ? null : value]))),
             });
             const result = await response.json().catch(() => ({}));
 
@@ -249,9 +250,7 @@
                 showToast('Berhasil', 'Pengalaman baru berhasil ditambahkan!', 'success');
                 fetchExperiences(searchInput.value.trim());
             } else {
-                const errorMessages = result.errors
-                    ? Object.values(result.errors).flat().map(error => error.message)
-                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                const errorMessages = Object.values(result).flat().filter(value => typeof value === 'string');
                 showToast('Gagal menambahkan pengalaman', errorMessages.join(' '), 'error');
             }
         } catch (error) {
@@ -268,5 +267,30 @@
 
     // Muat daftar pertama kali saat halaman dibuka.
     fetchExperiences(searchInput.value.trim());
+
+    gridContainer.addEventListener('submit', async event => {
+        const form = event.target.closest('form');
+        if (!form) return;
+        event.preventDefault();
+        if (!{{ user.is_authenticated|yesno:'true,false' }}) {
+            window.location.href = "{% url 'main:login' %}";
+            return;
+        }
+        const button = form.querySelector('button');
+        if (button.disabled) return;
+        button.disabled = true;
+        try {
+            const response = await fetch(form.action, {
+                method: form.classList.contains('star-form') ? 'POST' : 'DELETE',
+                headers: { Accept: 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            });
+            const data = response.status === 204 ? {} : await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(Object.values(data).flat().join(' ') || `HTTP ${response.status}`);
+            showToast('Berhasil', 'Data diperbarui.', 'success');
+            await fetchExperiences(searchInput.value.trim());
+        } catch (error) {
+            showToast('Gagal', error.message, 'error');
+        } finally { button.disabled = false; }
+    });
     </script>
 {% endblock %}

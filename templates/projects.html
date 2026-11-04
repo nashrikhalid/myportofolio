@@ -53,11 +53,12 @@
         {% include "components/project_form_modal.html" %}
     {% endif %}
     
+    {% csrf_token %}
     <script>
     // Konfigurasi
-    const BASE_PROJECTS_ENDPOINT = "{% url 'main:get_projects_json' %}";
+    const BASE_PROJECTS_ENDPOINT = "{% url 'api:project-list' %}";
     const IS_SUPERUSER = "{{ user.is_superuser|yesno:'true,false' }}" === "true";
-    const CAN_EDIT_PROJECTS = IS_SUPERUSER || "{{ is_editor|yesno:'true,false' }}" === "true";
+    const CAN_EDIT_PROJECTS = IS_SUPERUSER;
     let projectsAbortController;
 
     // Elemen DOM
@@ -90,8 +91,8 @@
 
     // Membuat elemen card project
     function buildProjectCardElement(item) {
-        const project = item.fields;
-        const projectId = item.pk;
+        const project = item;
+        const projectId = item.id;
 
         const articleElement = document.createElement('article');
         articleElement.className = 'project-block glass-card';
@@ -105,9 +106,9 @@
             : '';
 
         // Dummy UUID digunakan untuk digantikan oleh ID asli dari data JSON
-        const deleteUrl = "{% url 'main:delete_project' '00000000-0000-0000-0000-000000000000' %}"
+        const deleteUrl = "{% url 'api:project-detail' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', projectId);
-        const starUrl = "{% url 'main:toggle_project_star' '00000000-0000-0000-0000-000000000000' %}"
+        const starUrl = "{% url 'api:project-star' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', projectId);
         const editUrl = "{% url 'main:update_project' '00000000-0000-0000-0000-000000000000' %}"
             .replace('00000000-0000-0000-0000-000000000000', projectId);
@@ -138,7 +139,7 @@
                 <div class="project-actions">
                     ${urlHtml}
                     
-                    <form method="post" action="${starUrl}" class="star-form">
+                    {% if user.is_authenticated %}<form method="post" action="${starUrl}" class="star-form">
                         {% csrf_token %}
                         <button type="submit" 
                                 class="button button-star${isStarredClass}"
@@ -147,7 +148,7 @@
                             ${starText}
                             <span class="star-count">${project.star_count}</span>
                         </button>
-                    </form>
+                    </form>{% else %}<a href="{% url 'main:login' %}" class="button">Login untuk Star</a>{% endif %}
 
                     ${editHtml}
                     ${deleteHtml}
@@ -217,7 +218,7 @@
     document.getElementById("add-project-modal").hidePopover();
     }
 
-        const CREATE_PROJECT_ENDPOINT = "{% url 'main:create_project_ajax' %}";
+        const CREATE_PROJECT_ENDPOINT = "{% url 'api:project-list' %}";
     const projectForm = document.getElementById('project-form');
 
     // Membaca nilai cookie, digunakan untuk mengambil token CSRF
@@ -246,8 +247,8 @@
         try {
             const response = await fetch(CREATE_PROJECT_ENDPOINT, {
                 method: 'POST',
-                headers: { 'X-CSRFToken': getCookie('csrftoken') },
-                body: new FormData(projectForm),
+                headers: { 'Accept': 'application/json', 'Content-Type': 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+                body: JSON.stringify(Object.fromEntries([...new FormData(projectForm)].filter(([key]) => key !== "csrfmiddlewaretoken").map(([key,value]) => [key, key === "ended_at" && !value ? null : value]))),
             });
             const result = await response.json().catch(() => ({}));
 
@@ -257,9 +258,7 @@
                 showToast('Berhasil', 'Proyek baru berhasil ditambahkan!', 'success');
                 fetchProjects(searchInput.value.trim());
             } else {
-                const errorMessages = result.errors
-                    ? Object.values(result.errors).flat().map(error => error.message)
-                    : [result.message || `Terjadi kesalahan (status ${response.status}).`];
+                const errorMessages = Object.values(result).flat().filter(value => typeof value === 'string');
                 showToast('Gagal menambahkan proyek', errorMessages.join(' '), 'error');
             }
         } catch (error) {
@@ -276,5 +275,30 @@
 
     // Start application
     fetchProjects(searchInput.value.trim());
+
+    gridContainer.addEventListener('submit', async event => {
+        const form = event.target.closest('form');
+        if (!form) return;
+        event.preventDefault();
+        if (!{{ user.is_authenticated|yesno:'true,false' }}) {
+            window.location.href = "{% url 'main:login' %}";
+            return;
+        }
+        const button = form.querySelector('button');
+        if (button.disabled) return;
+        button.disabled = true;
+        try {
+            const response = await fetch(form.action, {
+                method: form.classList.contains('star-form') ? 'POST' : 'DELETE',
+                headers: { Accept: 'application/json', 'X-CSRFToken': getCookie('csrftoken') },
+            });
+            const data = response.status === 204 ? {} : await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(Object.values(data).flat().join(' ') || `HTTP ${response.status}`);
+            showToast('Berhasil', 'Data diperbarui.', 'success');
+            await fetchProjects(searchInput.value.trim());
+        } catch (error) {
+            showToast('Gagal', error.message, 'error');
+        } finally { button.disabled = false; }
+    });
     </script>
 {% endblock %}

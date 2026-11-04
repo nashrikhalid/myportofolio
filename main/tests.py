@@ -106,6 +106,9 @@ class AssignmentFourTest(TestCase):
             for name, obj, data in self.resources():
                 with self.subTest(role=user.username, resource=name):
                     url = reverse(f"main:update_{name}", args=[obj.pk])
+                    if name == "project" and user == self.editor:
+                        self.assertEqual(self.client.post(url, data).status_code, 403)
+                        continue
                     self.assertEqual(self.client.get(url).status_code, 200)
                     self.assertEqual(self.client.post(url, data).status_code, 302)
                     obj.refresh_from_db()
@@ -135,6 +138,10 @@ class AssignmentFourTest(TestCase):
                 with self.subTest(role=user.username if user else "anonymous", page=page):
                     response = self.client.get(reverse("main:" + page))
                     self.assertEqual(response.status_code, 200)
+                    if name in ("project", "experience"):
+                        self.assertContains(response, reverse(f"api:{name}-list"))
+                        self.assertEqual('id="' + name + '-form"' in response.content.decode(), user == self.owner)
+                        continue
                     edit = reverse(f"main:update_{name}", args=[obj.pk])
                     (self.assertContains if user in (self.editor, self.owner) else self.assertNotContains)(response, edit)
                     for url in [reverse(f"main:create_{name}"), reverse(f"main:delete_{name}", args=[obj.pk])]:
@@ -151,7 +158,7 @@ class AssignmentFourTest(TestCase):
             self.assertEqual(self.experience.starred_by.count(), before + 1)
             response = self.client.get(reverse("main:show_experiences"))
             self.assertContains(response, "Unstar")
-            self.assertContains(response, f'class="star-count">{before + 1}')
+            self.assertEqual(self.client.get(reverse("api:experience-list")).json()[0]["star_count"], before + 1)
         self.experience.starred_by.add(self.member)
         self.assertEqual(self.experience.starred_by.count(), 3)
         self.client.force_login(self.member)
@@ -172,8 +179,8 @@ class AssignmentFourTest(TestCase):
 
     def test_public_json_fields_and_search(self):
         expected = {
-            "projects": {"title", "description", "tech_stack", "project_url", "project_image_url", "starred_by"},
-            "experiences": {"title", "org", "description", "category", "started_at", "ended_at", "starred_by"},
+            "projects": {"title", "description", "tech_stack", "project_url", "project_image_url", "star_count", "is_starred", "starred_by_names"},
+            "experiences": {"title", "org", "description", "category_display", "started_at", "ended_at", "is_ongoing", "star_count", "is_starred", "starred_by_names"},
             "skills": {"name", "logo"},
         }
         for name, fields in expected.items():
@@ -193,7 +200,7 @@ class AssignmentFourTest(TestCase):
             with self.subTest(endpoint=endpoint):
                 obj.starred_by.add(self.member)
                 data = self.client.get(reverse("main:" + endpoint)).json()
-                self.assertEqual(data[0]["fields"]["starred_by"], [[self.member.username]])
+                self.assertEqual(data[0]["fields"]["starred_by_names"], self.member.username)
 
 
 class MainTest(TestCase):
@@ -218,17 +225,17 @@ class MainTest(TestCase):
 
     def test_experience_model_data_shown(self):
         # 2. Data model muncul di halaman HTML ketika ada data.
-        response = self.client.get(reverse("main:show_experiences"))
+        response = self.client.get(reverse("api:experience-list"))
         self.assertContains(response, self.experience.title)
         self.assertContains(response, "Membantu mahasiswa memahami pengembangan web.")
         self.assertContains(response, "Part-Time")
-        self.assertContains(response, "Present")
+        self.assertTrue(response.json()[0]["is_ongoing"])
 
     def test_empty_experience_page(self):
         # 3. Halaman HTML menampilkan pesan kondisi kosong ketika belum ada data.
         Experience.objects.all().delete()
         response = self.client.get(reverse("main:show_experiences"))
-        self.assertContains(response, "Belum ada pengalaman yang ditambahkan.")
+        self.assertContains(response, "Belum ada pengalaman yang ditambahkan atau ditemukan.")
 
 
 class TutorialFourTest(TestCase):
@@ -250,7 +257,7 @@ class TutorialFourTest(TestCase):
         self.assertNotContains(response, reverse("main:update_project", args=[self.project.pk]))
         self.client.force_login(self.owner)
         response = self.client.get(reverse("main:show_projects"))
-        for text in ["Tambah Proyek", "Hapus Proyek", reverse("main:update_project", args=[self.project.pk])]:
+        for text in ["Tambah Proyek", "Hapus", reverse("api:project-list")]:
             self.assertContains(response, text)
 
     def test_register_validation_and_password_hash(self):
@@ -331,11 +338,10 @@ class TutorialFourTest(TestCase):
         self.assertEqual(self.project.starred_by.count(), 1)
         response = self.client.get(reverse("main:show_projects"))
         self.assertContains(response, "Unstar")
-        self.assertContains(response, "Dibintangi oleh visitor")
-        self.assertContains(response, 'class="star-count">1')
+        self.assertEqual(self.client.get(reverse("api:project-list")).json()[0]["star_count"], 1)
         self.assertNotContains(response, "Hapus Proyek")
         data = self.client.get(reverse("main:get_projects_json")).json()
-        self.assertEqual(data[0]["fields"]["starred_by"], [["visitor"]])
+        self.assertEqual(data[0]["fields"]["starred_by_names"], "visitor")
         self.client.force_login(self.other)
         self.client.post(url)
         self.assertEqual(self.project.starred_by.count(), 2)
@@ -345,8 +351,8 @@ class TutorialFourTest(TestCase):
         self.assertEqual(self.user.starred_projects.count(), 0)
 
     def test_project_search_and_missing_project(self):
-        self.assertContains(self.client.get(reverse("main:show_projects"), {"title": "Tutorial"}), self.project.title)
-        self.assertNotContains(self.client.get(reverse("main:show_projects"), {"title": "absent"}), self.project.title)
+        self.assertContains(self.client.get(reverse("api:project-list"), {"title": "Tutorial"}), self.project.title)
+        self.assertNotContains(self.client.get(reverse("api:project-list"), {"title": "absent"}), self.project.title)
         self.client.force_login(self.user)
         self.assertEqual(self.client.post(reverse("main:toggle_project_star", args=["00000000-0000-0000-0000-000000000000"])).status_code, 404)
 

@@ -180,8 +180,7 @@ def delete_project(request, project_id):
 
 @login_required(login_url="main:login")
 def update_project(request, project_id):
-    is_editor = request.user.groups.filter(name="Editor").exists()
-    if not (request.user.is_superuser or is_editor):
+    if not request.user.is_superuser:
         raise PermissionDenied
     project = get_object_or_404(Project, pk=project_id)
     form = ProjectForm(request.POST or None, instance=project)
