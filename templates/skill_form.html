@@ -1,4 +1,5 @@
 {% extends "base.html" %}
+{% load static %}
 {% block meta %}
     <title>{% if skill %}Edit{% else %}Tambah{% endif %} Skill - {{ name }}</title>
 {% endblock meta %}
@@ -9,7 +10,10 @@
                 <h1>{% if skill %}Edit Skill{% else %}Tambah Skill Baru{% endif %}</h1>
                 <a href="{% url 'main:show_skills' %}" class="button button-secondary">Kembali</a>
             </div>
-            <form method="post" class="project-form">
+            <form method="post" class="project-form" id="skill-form"
+                  data-api="{% if skill %}{% url 'api:skill-detail' skill.pk %}{% else %}{% url 'api:skill-list' %}{% endif %}"
+                  data-method="{% if skill %}PUT{% else %}POST{% endif %}"
+                  data-success-url="{% url 'main:show_main' %}#skills">
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -30,4 +34,5 @@
             </form>
         </div>
     </section>
+    <script defer src="{% static 'js/skills.js' %}"></script>
 {% endblock content %}

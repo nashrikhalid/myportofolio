@@ -1,5 +1,6 @@
+{% load static %}
 
-    <section class="skills-section" id="skills">
+    <section class="skills-section" id="skills" data-api="{% url 'api:skill-list' %}">
         <div class="container">
             <!-- Header dengan Tombol Tambah -->
             <div class="skill-header" style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem;">
@@ -11,25 +12,21 @@
                 {% endif %}
             </div>
 
-            <!-- Wrapper Skills -->
+            <form action="{% url 'main:show_skills' %}" class="project-search" data-skill-search>
+                <input type="search" name="name" value="{{ name_query }}" placeholder="Cari skill" aria-label="Cari skill">
+                <button class="button" type="submit">Cari</button>
+            </form>
+            <template id="skill-card-template">
+                {% include "components/skill_card.html" with skill_id="00000000-0000-0000-0000-000000000000" skill_name="" skill_logo="" %}
+            </template>
             <div class="skills-wrapper">
                 {% for skill in skill_list %}
-                    <div class="skill-item">
-                        <div class="skill glass-card" aria-label="{{ skill.name }}" title="{{ skill.name }}">
-                            <span class="{{ skill.logo }}"></span>
-                        </div>
-                        {% if user.is_superuser or is_editor %}
-                            <a href="{% url 'main:update_skill' skill.id %}"
-                               class="button"
-                               aria-label="Edit {{ skill.name }}">Edit</a>
-                        {% endif %}
-                        {% if user.is_superuser %}
-                            {% include "components/skill_delete_modal.html" with skill=skill %}
-                        {% endif %}
-                    </div>
+                    {% include "components/skill_card.html" with skill_id=skill.id skill_name=skill.name skill_logo=skill.logo %}
                 {% empty %}
                     <p>Belum ada skill yang ditambahkan.</p>
                 {% endfor %}
             </div>
         </div>
     </section>
+
+<script defer src="{% static 'js/skills.js' %}"></script>

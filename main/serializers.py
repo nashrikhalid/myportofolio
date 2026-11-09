@@ -1,6 +1,6 @@
 from django.utils.html import strip_tags
 from rest_framework import serializers
-from main.models import Project, Experience
+from main.models import Project, Experience, Skill
 
 
 class StarredSerializer(serializers.ModelSerializer):
@@ -58,4 +58,23 @@ class ExperienceSerializer(StarredSerializer):
         value = strip_tags(value).strip()
         if not value:
             raise serializers.ValidationError("Organization cannot be empty.")
+        return value
+
+
+class SkillSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Skill
+        fields = ["id", "name", "logo"]
+        read_only_fields = ["id"]
+
+    def validate_name(self, value):
+        value = strip_tags(value).strip()
+        if not value:
+            raise serializers.ValidationError("Nama skill tidak boleh kosong.")
+        return value
+
+    def validate_logo(self, value):
+        value = strip_tags(value).strip()
+        if not value:
+            raise serializers.ValidationError("Logo skill tidak boleh kosong.")
         return value

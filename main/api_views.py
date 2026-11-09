@@ -3,8 +3,8 @@ from rest_framework.authentication import SessionAuthentication
 from rest_framework.decorators import api_view, authentication_classes, permission_classes
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
-from main.models import Project, Experience
-from main.serializers import ProjectSerializer, ExperienceSerializer
+from main.models import Project, Experience, Skill
+from main.serializers import ProjectSerializer, ExperienceSerializer, SkillSerializer
 from main.permissions import IsPortfolioOwnerOrReadOnly, IsPortfolioOwnerOrEditorOrReadOnly
 
 
@@ -94,3 +94,35 @@ def experience_star(request, experience_id):
     else:
         obj.starred_by.add(request.user)
     return Response(ExperienceSerializer(obj, context={"request": request}).data)
+
+
+@api_view(["GET", "HEAD", "POST"])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
+def skill_list(request):
+    if request.method in ("GET", "HEAD"):
+        skills = Skill.objects.order_by("name", "id")
+        name = request.query_params.get("name", "").strip()
+        if name:
+            skills = skills.filter(name__icontains=name)
+        return Response(SkillSerializer(skills, many=True).data)
+    serializer = SkillSerializer(data=request.data)
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data, status=201)
+
+
+@api_view(["GET", "HEAD", "PUT", "PATCH", "DELETE"])
+@authentication_classes([SessionAuthentication])
+@permission_classes([IsPortfolioOwnerOrEditorOrReadOnly])
+def skill_detail(request, skill_id):
+    skill = get_object_or_404(Skill, pk=skill_id)
+    if request.method in ("GET", "HEAD"):
+        return Response(SkillSerializer(skill).data)
+    if request.method == "DELETE":
+        skill.delete()
+        return Response(status=204)
+    serializer = SkillSerializer(skill, data=request.data, partial=request.method == "PATCH")
+    serializer.is_valid(raise_exception=True)
+    serializer.save()
+    return Response(serializer.data)

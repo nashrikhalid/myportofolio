@@ -47,10 +47,10 @@ Di tutorial 3, show_projects juga memanggil get_projects_json, lalu hasilnya di-
 Link AI Gemini: https://share.gemini.google/TEAkHw9YbMLZ
 
 
-## Tugas 4
+### Tugas 4
 AI Disclosure: Dalam mengerjakan tugas 4, saya memakai AI untuk memahami alur autentikasi dan cookie, serta meminta penjelasan lebih rinci mengenai tutorial 4 dan contoh penerapannya di tugas 4.
 
-## Tutorial 4 Opsional
+### Tutorial 4 Opsional
 
 Skrip pengujian browser dan eksperimen intersepsi CSRF tersedia dalam [panduan Selenium dan Burp Suite](docs/tutorial4-optional.md). Jalankan dengan virtual environment aktif: python test_e2e.py --headless atau python test_e2e.py --burp.
 
@@ -101,3 +101,26 @@ Saya menggunakan OpenAI Codex melalui percakapan untuk memahami instruksi Tugas 
 Codex membantu menulis skrip AJAX Experiences dan menyesuaikan field endpoint JSON, mempertahankan desain kartu, membetulkan penamaan tunggal/jamak beserta referensinya, serta memeriksa hak akses dan validasi. Codex juga membantu memperbaiki pembersihan field organisasi, menghapus fungsi escapeHtml yang duplikat, dan merapikan jawaban reflektif serta dokumentasi ini. Jadi bantuan AI mencakup penjelasan, penulisan/perubahan kode, pemeriksaan, dan penyusunan dokumentasi.
 
 Proses ini menunjukkan bahwa contoh kode tidak dapat langsung disalin tanpa disesuaikan: field Projects berbeda dari Experience, nama class CSS harus cocok dengan desain, dan method clean_<field> harus sesuai nama field serta berada di dalam kelas form, bukan Meta. Pemeriksaan kode dan endpoint oleh AI juga belum membuktikan seluruh interaksi browser berjalan benar. Pengujian manual antarmuka dan pemeriksaan hasil akhir tetap diperlukan. Ringkasan ini merupakan catatan penggunaan AI, bukan transkrip lengkap percakapan.
+
+### Tugas 6
+1. Jelaskan apa yang dimaksud dengan REST dan mengapa mengembalikan JSON saja belum
+cukup untuk menyebut sebuah API sebagai RESTful! Jelaskan pula perbedaan PUT dan PATCH
+beserta contoh kapan masing-masing sebaiknya digunakan!
+   Jawab: REST adalah gaya arsitektur API yang mengatur data sebagai resource. Misalnya, URL detail menunjuk satu pengalaman, sedangkan method HTTP menentukan tindakannya. JSON hanya format pertukaran data, jadi penggunaannya saja belum menunjukkan bahwa API mengikuti REST. Saya memakai `PUT` saat form edit mengirim seluruh field wajib dan `PATCH` saat hanya organisasi yang ingin diubah.
+
+2. Jelaskan peran serializer pada Django REST Framework! Apa keuntungannya dibandingkan
+merakit dictionary secara manual dengan JsonResponse seperti pada Tutorial 05?
+   Jawab: Serializer bekerja dua arah. Saat membaca, serializer mengubah objek `Experience` menjadi data yang bisa dikirim sebagai JSON. Saat menyimpan, serializer memeriksa input, misalnya menolak nama organisasi yang kosong setelah tag HTML dibersihkan. Dibanding menyusun dictionary untuk `JsonResponse` secara manual, daftar field dan aturan validasi bisa ditulis sekali lalu dipakai kembali saat membuat atau mengedit pengalaman.
+
+3. Jelaskan perbedaan autentikasi dan otorisasi pada Django REST Framework! Mengapa hak
+akses harus diperiksa dengan permission class di server, bukan hanya dengan menyembunyikan
+tombol di template?
+   Jawab: Autentikasi mengenali akun melalui sesi login. Otorisasi menentukan tindakan yang boleh dilakukan akun itu. Di halaman Experiences, Editor boleh mengedit, tetapi hanya pemilik yang boleh menghapus. Tombol Hapus bisa disembunyikan, tetapi Editor tetap bisa mengirim `DELETE` langsung ke API. Karena itu, permission di server harus memeriksa request dan menolaknya dengan `403`.
+
+4. Jelaskan mengapa permintaan yang mengubah data tetap memerlukan token CSRF ketika API
+memakai SessionAuthentication! Mengapa test yang memakai force_authenticate tidak
+cukup untuk membuktikan bahwa perlindungan CSRF berjalan?
+   Jawab: Browser otomatis menyertakan cookie sesi pada request yang memenuhi aturan cookie. Karena itu, API yang memakai `SessionAuthentication` juga memeriksa token CSRF saat data diubah untuk mencegah situs lain memanfaatkan sesi pengguna. `force_authenticate` langsung menetapkan akun dalam test sehingga alur autentikasi sesi dan pemeriksaan CSRF terlewati. Untuk mengujinya, saya memakai `APIClient(enforce_csrf_checks=True)` dan `.login()`: request Editor tanpa token mendapat `403`, sedangkan request yang sama dengan token berhasil.
+
+
+**AI disclosure.** Codex digunakan untuk mencocokkan checklist tugas 6 dengan hasil Tutorial 7 dan menulis serta menjalankan pengujian. 

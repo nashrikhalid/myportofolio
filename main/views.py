@@ -101,13 +101,8 @@ def show_projects(request):
     return render(request, "projects.html", context)
 
 def show_skills(request):
-    json_response = get_skills_json(request)
-    skills = serializers.deserialize(
-        "json",
-        json_response.content.decode("utf-8"),
-    )
-    skills = [s.object for s in skills]
     name_query = request.GET.get("name", "").strip()
+    skills = Skill.objects.filter(name__icontains=name_query).order_by("name", "id")
 
     context = {
         "name": "Nashri",
@@ -115,7 +110,7 @@ def show_skills(request):
         "name_query": name_query,
         "is_editor": request.user.groups.filter(name="Editor").exists(),
     }
-    return render(request, "skills.html", context)
+    return render(request, "skills_page.html", context)
 
 @login_required(login_url="main:login")
 def create_project(request):

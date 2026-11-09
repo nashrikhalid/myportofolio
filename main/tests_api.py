@@ -3,7 +3,7 @@ from django.contrib.auth.models import Group, User
 from django.urls import reverse
 from rest_framework import status
 from rest_framework.test import APIClient, APITestCase
-from main.models import Project
+from main.models import Project, Experience
 class ProjectAPITest(APITestCase):
     def setUp(self):
         self.owner = User.objects.create_superuser(
@@ -133,37 +133,77 @@ status.HTTP_405_METHOD_NOT_ALLOWED)
 
 class ExperienceAPITest(APITestCase):
     def setUp(self):
-        from main.models import Experience
         self.obj = Experience.objects.create(title='Research', org='UI', description='Study')
         self.url = reverse('api:experience-detail', args=[self.obj.pk])
         self.list_url = reverse('api:experience-list')
+        self.payload = {
+            'title': 'Work', 'org': 'Fakultas Ilmu Komputer', 'description': 'Study',
+            'category': 'research', 'started_at': '2026-11', 'ended_at': None,
+        }
         self.editor = User.objects.create_user('editor')
         self.editor.groups.add(Group.objects.create(name='Editor'))
 
     def test_editor_update_but_not_create_delete(self):
         self.client.force_authenticate(self.editor)
         self.assertEqual(self.client.patch(self.url, {'title': 'Updated'}, format='json').status_code, 200)
-        self.assertEqual(self.client.post(self.list_url, {}, format='json').status_code, 403)
+        self.assertEqual(self.client.post(self.list_url, self.payload, format='json').status_code, 403)
         self.assertEqual(self.client.delete(self.url).status_code, 403)
         self.obj.refresh_from_db()
         self.assertEqual(self.obj.title, 'Updated')
+        self.assertEqual(Experience.objects.count(), 1)
 
     def test_public_read_and_member_denied(self):
         self.assertEqual(self.client.get(self.list_url).status_code, 200)
         self.assertEqual(self.client.get(self.url).status_code, 200)
-        self.assertEqual(self.client.patch(self.url, {}, format='json').status_code, 403)
+        member = User.objects.create_user('member')
+        for user in (None, member):
+            self.client.force_authenticate(user=user)
+            self.assertEqual(self.client.post(self.list_url, self.payload, format='json').status_code, 403)
+            self.assertEqual(self.client.put(self.url, self.payload, format='json').status_code, 403)
+            self.assertEqual(self.client.patch(self.url, {'org': 'Changed'}, format='json').status_code, 403)
+            self.assertEqual(self.client.delete(self.url).status_code, 403)
+            self.assertEqual(Experience.objects.count(), 1)
+            self.obj.refresh_from_db()
+            self.assertEqual(self.obj.org, 'UI')
+
+    def test_star_requires_login_and_toggles(self):
+        star = reverse('api:experience-star', args=[self.obj.pk])
+        self.assertEqual(self.client.post(star).status_code, 403)
+        self.assertEqual(self.obj.starred_by.count(), 0)
         member = User.objects.create_user('member')
         self.client.force_authenticate(member)
-        self.assertEqual(self.client.patch(self.url, {}, format='json').status_code, 403)
-        star = reverse('api:experience-star', args=[self.obj.pk])
-        self.assertTrue(self.client.post(star).data['is_starred'])
+        for expected in (True, False):
+            response = self.client.post(star)
+            self.assertEqual(response.status_code, 200)
+            self.assertEqual(response.data['is_starred'], expected)
+            self.assertEqual(self.obj.starred_by.filter(pk=member.pk).exists(), expected)
+
+    def test_editor_edit_form_with_session_requires_csrf(self):
+        self.editor.set_password('editor-test-password')
+        self.editor.save()
+        client = APIClient(enforce_csrf_checks=True)
+        self.assertTrue(client.login(username='editor', password='editor-test-password'))
+        page = client.get(reverse('main:update_experience', args=[self.obj.pk]))
+        self.assertContains(page, f'data-edit-url="{self.url}"')
+        response = client.put(self.url, self.payload, format='json')
+        self.assertEqual(response.status_code, 403)
+        self.obj.refresh_from_db()
+        self.assertEqual(self.obj.org, 'UI')
+        token = client.cookies['csrftoken'].value
+        response = client.put(self.url, self.payload, format='json', HTTP_X_CSRFTOKEN=token)
+        self.assertEqual(response.status_code, 200)
+        self.obj.refresh_from_db()
+        self.assertEqual(self.obj.org, self.payload['org'])
+        self.assertIsNone(self.obj.ended_at)
 
     def test_owner_month_input_and_validation(self):
         owner = User.objects.create_superuser('owner', email='owner@example.com', password='test')
         self.client.force_authenticate(owner)
-        payload = {'title': 'Work', 'org': 'UI', 'description': 'Study', 'category': 'research', 'started_at': '2026-11', 'ended_at': None}
-        response = self.client.post(self.list_url, payload, format='json')
+        response = self.client.post(self.list_url, self.payload, format='json')
         self.assertEqual(response.status_code, 201)
         self.assertTrue(response.data['is_ongoing'])
         self.assertEqual(self.client.patch(self.url, {'org': '<b></b>'}, format='json').status_code, 400)
+        self.obj.refresh_from_db()
+        self.assertEqual(self.obj.org, 'UI')
         self.assertEqual(self.client.delete(self.url).status_code, 204)
+        self.assertFalse(Experience.objects.filter(pk=self.obj.pk).exists())

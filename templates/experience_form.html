@@ -9,7 +9,8 @@
                 <h1>{% if experience %}Edit Pengalaman{% else %}Tambah Pengalaman Baru{% endif %}</h1>
                 <a href="{% url 'main:show_experiences' %}" class="button button-secondary">Kembali</a>
             </div>
-            <form method="post" class="project-form">
+            <form method="post" class="project-form"
+                  {% if experience %}data-edit-url="{% url 'api:experience-detail' experience.pk %}"{% endif %}>
                 {% csrf_token %}
                 {% for field in form %}
                     <div class="form-group" style="margin-bottom: 1.25rem;">
@@ -30,4 +31,41 @@
             </form>
         </div>
     </section>
+    {% if experience %}
+    <script>
+        const editForm = document.querySelector('form[data-edit-url]');
+        editForm.addEventListener('submit', async event => {
+            event.preventDefault();
+            const button = editForm.querySelector('button[type="submit"]');
+            if (button.disabled) return;
+            button.disabled = true;
+            try {
+                const fields = new FormData(editForm);
+                const token = fields.get('csrfmiddlewaretoken');
+                fields.delete('csrfmiddlewaretoken');
+                const payload = Object.fromEntries(fields);
+                if (!payload.ended_at) payload.ended_at = null;
+
+                const response = await fetch(editForm.dataset.editUrl, {
+                    method: 'PUT',
+                    headers: {
+                        Accept: 'application/json',
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': token,
+                    },
+                    body: JSON.stringify(payload),
+                });
+                if (!response.ok) {
+                    const errors = await response.json().catch(() => ({}));
+                    throw new Error(Object.values(errors).flat().join(' ') || `HTTP ${response.status}`);
+                }
+                showToast('Berhasil', 'Perubahan pengalaman sudah tersimpan.', 'success');
+            } catch (error) {
+                showToast('Gagal menyimpan', error.message, 'error');
+            } finally {
+                button.disabled = false;
+            }
+        });
+    </script>
+    {% endif %}
 {% endblock content %}

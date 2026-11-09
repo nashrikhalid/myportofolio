@@ -1,0 +1,13 @@
+<div class="skill-item">
+                        <div class="skill glass-card" aria-label="{{ skill_name }}" title="{{ skill_name }}">
+                            <span class="{{ skill_logo }}"></span>
+                        </div>
+                        {% if user.is_superuser or is_editor %}
+                            <a href="{% url 'main:update_skill' skill_id %}"
+                               class="button"
+                               aria-label="Edit {{ skill_name }}">Edit</a>
+                        {% endif %}
+                        {% if user.is_superuser %}
+                            {% include "components/skill_delete_modal.html" with skill_id=skill_id skill_name=skill_name %}
+                        {% endif %}
+                    </div>
